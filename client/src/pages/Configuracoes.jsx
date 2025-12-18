@@ -76,7 +76,7 @@ function Configuracoes() {
   // Busca configurações gerais (horários, dados e perfil)
   const carregarConfiguracoes = async () => {
     try {
-      const res = await axios.get("http://localhost:3001/config");
+      const res = await axios.get(`${API_BASE_URL}/config`);
 
       if (res.data.horarios) setHorarios(res.data.horarios);
       if (res.data.dadosBarbearia) setDadosBarbearia(res.data.dadosBarbearia);
@@ -89,7 +89,7 @@ function Configuracoes() {
   // Busca serviços cadastrados
   const carregarServicos = async () => {
     try {
-      const res = await axios.get("http://localhost:3001/servicos");
+      const res = await axios.get(`${API_BASE_URL}/servicos`);
       setServicos(res.data);
     } catch (error) {
       console.error("Erro ao carregar serviços:", error);
@@ -109,7 +109,7 @@ function Configuracoes() {
         perfil,
       };
 
-      await axios.put("http://localhost:3001/config", payload);
+      await axios.put(`${API_BASE_URL}/config`, payload);
       alert("Configurações salvas com sucesso!");
     } catch (error) {
       console.error("Erro ao salvar configurações:", error);
@@ -125,10 +125,7 @@ function Configuracoes() {
   const addServico = async () => {
     try {
       const novoServico = { nome: "Novo Serviço", preco: "0,00" };
-      const res = await axios.post(
-        "http://localhost:3001/servicos",
-        novoServico
-      );
+      const res = await axios.post(`${API_BASE_URL}/servicos`, novoServico);
       setServicos([...servicos, res.data]);
     } catch (error) {
       alert("Erro ao adicionar serviço");
@@ -139,7 +136,7 @@ function Configuracoes() {
   const deleteServico = async (id) => {
     if (window.confirm("Remover este serviço?")) {
       try {
-        await axios.delete(`http://localhost:3001/servicos/${id}`);
+        await axios.delete(`${API_BASE_URL}/servicos/${id}`);
         setServicos(servicos.filter((s) => s.id !== id));
       } catch (error) {
         alert("Erro ao deletar serviço");
@@ -157,10 +154,8 @@ function Configuracoes() {
   // Salva edição do serviço ao perder foco
   const salvarEdicaoServico = async (servico) => {
     try {
-      await axios.put(
-        `{https://pride-barbers-api.onrender.com}/servicos/${servico.id}`,
-        servico
-      );
+      // ✅ JEITO CORRETO (Usando a variável)
+      await axios.put(`${API_BASE_URL}/servicos/${servico.id}`, servico);
     } catch (error) {
       console.error("Erro ao salvar edição do serviço");
     }
