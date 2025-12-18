@@ -157,7 +157,10 @@ function Configuracoes() {
   // Salva edição do serviço ao perder foco
   const salvarEdicaoServico = async (servico) => {
     try {
-      await axios.put(`http://localhost:3001/servicos/${servico.id}`, servico);
+      await axios.put(
+        `{https://pride-barbers-api.onrender.com}/servicos/${servico.id}`,
+        servico
+      );
     } catch (error) {
       console.error("Erro ao salvar edição do serviço");
     }

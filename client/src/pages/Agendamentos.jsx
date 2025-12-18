@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 // Constante para facilitar manutenção da URL da API
-const API_BASE_URL = "http://localhost:3001";
+const API_BASE_URL = "https://pride-barbers-api.onrender.com";
 
 function Agendamentos() {
   // =================================================================

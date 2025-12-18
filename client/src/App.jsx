@@ -43,7 +43,7 @@ import Configuracoes from "./pages/Configuracoes";
 import "./App.css";
 
 // --- CONFIGURAÇÕES GERAIS ---
-const API_BASE_URL = "http://localhost:3001";
+const API_BASE_URL = "https://pride-barbers-api.onrender.com";
 
 // Registro dos módulos do Chart.js
 ChartJS.register(
