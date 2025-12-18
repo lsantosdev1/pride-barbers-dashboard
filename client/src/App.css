@@ -1,0 +1,862 @@
+/* ==========================================================================
+   PROJETO: PRIDE BARBERS DASHBOARD
+   ARQUIVO: App.css
+   DESCRIÇÃO: Estilos globais, tema Dark/Neon e componentes responsivos.
+   ========================================================================== */
+
+/* =========================================
+   1. VARIÁVEIS GLOBAIS & TEMA (:ROOT)
+   Definição da paleta de cores Neon e estrutura.
+   ========================================= */
+:root {
+  /* --- Cores Base (Fundo e Texto) --- */
+  --color-bg-main: #0a0a0a; /* Preto Profundo (Fundo Geral) */
+  --color-bg-secondary: #111111; /* Preto Suave (Sidebar/Paineis) */
+  --color-bg-card: linear-gradient(
+    145deg,
+    #1a1a1a,
+    #222222
+  ); /* Gradiente 3D para Cards */
+
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #a0a0a0;
+  --color-border: #333;
+
+  /* --- Cores de Ação (Identidade Visual Neon) --- */
+  --color-primary: #ff4444; /* Vermelho Neon (Marca Principal) */
+  --color-accent: #ffffff; /* Branco Puro (Destaques) */
+  --color-accent-blue: #7380ec; /* Azul Neon (Informações) */
+  --color-success: #41f1b6; /* Verde Neon (Sucesso/Dinheiro) */
+  --color-warning: #ffbb55; /* Laranja Neon (Alertas) */
+
+  /* --- Efeitos Visuais --- */
+  --shadow-card: 0 8px 20px rgba(0, 0, 0, 0.5);
+  --neon-glow: 0 0 10px rgba(255, 68, 68, 0.4);
+
+  /* --- Tipografia --- */
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.5;
+  color-scheme: dark;
+}
+
+/* =========================================
+   2. RESET CSS
+   Normalização básica para consistência entre navegadores.
+   ========================================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-bg-main);
+  color: var(--color-text-primary);
+  overflow: hidden; /* Evita scroll duplo global */
+}
+
+/* =========================================
+   3. TELA DE LOGIN (ESTILO GLASSMORPHISM)
+   Fundo com imagem e formulário com efeito de vidro.
+   ========================================= */
+.login-container {
+  width: 100vw;
+  height: 100vh;
+  min-height: 100svh; /* Suporte melhor para mobile */
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: url("./assets/imgsalao2.png") no-repeat center center;
+  background-size: cover;
+  position: relative;
+  padding: 1rem;
+}
+
+/* Caixa do Formulário (Efeito Vidro) */
+.login-container form {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem;
+
+  background: rgba(20, 20, 20, 0.25);
+  backdrop-filter: blur(2px); /* Desfoque do fundo */
+  -webkit-backdrop-filter: blur(10px); /* Safari support */
+
+  border-radius: 14px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.993);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+form h2 {
+  text-align: center;
+  color: var(--color-accent);
+  font-family: "Georgia", serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Inputs do Login */
+.input-group {
+  position: relative;
+  width: 100%;
+}
+
+.input-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #ffffff;
+  z-index: 10;
+}
+
+.login-container input {
+  width: 100%;
+  padding: 12px 12px 12px 45px; /* Espaço para o ícone */
+  background-color: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgb(255, 255, 255);
+  border-radius: 8px;
+  color: white;
+  outline: none;
+  font-size: 1rem;
+  transition: 0.3s;
+}
+
+.login-container input:focus {
+  border-color: var(--color-accent);
+  background: rgba(0, 0, 0, 0.6);
+}
+
+/* Botão de Login */
+.login-container button {
+  padding: 16px;
+  background: linear-gradient(to bottom, #666, #444);
+  color: white;
+  border: 1px solid #ffffff;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.login-container button:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(to bottom, #777, #555);
+}
+
+/* Links e Checkbox do Login */
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  font-size: 0.9rem;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.checkbox-label:hover {
+  color: white;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-accent);
+  background: transparent;
+}
+
+.forgot-link,
+.register-link a {
+  color: #ffffff;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+.forgot-link:hover,
+.register-link a:hover {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+
+.register-link {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #8d8c8c;
+}
+
+/* =========================================
+   4. LAYOUT DO DASHBOARD (CSS GRID)
+   Estrutura: Sidebar Fixa (260px) + Conteúdo Fluído.
+   ========================================= */
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--color-bg-main);
+}
+
+/* Área Principal */
+main {
+  background: radial-gradient(circle at top right, #1a1a1a, #0a0a0a);
+  padding: 2rem;
+  overflow-y: auto; /* Scroll apenas no conteúdo */
+}
+
+/* Container de Página (Limita a largura) */
+.page-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: 4rem;
+  animation: fadeIn 0.4s ease-out; /* Animação de entrada suave */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.subtitle {
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+  margin-top: 5px;
+}
+
+/* =========================================
+   5. SIDEBAR (MENU LATERAL)
+   Estilo escuro com itens ativos em neon.
+   ========================================= */
+.sidebar {
+  background: var(--color-bg-secondary);
+  padding: 2rem 1.5rem;
+  border-right: 1px solid var(--color-border);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 10;
+  box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+.brand img {
+  width: 100px;
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 0 5px rgba(255, 68, 68, 0.4));
+}
+.brand h3 {
+  color: white;
+  font-family: "Georgia", serif;
+  text-transform: uppercase;
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar nav a {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  text-decoration: none;
+  color: var(--color-text-secondary);
+  padding: 12px 15px;
+  border-radius: 10px;
+  transition: 0.3s;
+  border-left: 3px solid transparent;
+}
+
+/* Hover e Active State */
+.sidebar nav a:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+}
+
+.sidebar nav a.active {
+  background: linear-gradient(90deg, rgba(255, 68, 68, 0.15), transparent);
+  color: var(--color-primary);
+  border-left-color: var(--color-primary);
+  box-shadow: -5px 0 15px rgba(255, 68, 68, 0.1);
+}
+
+/* Perfil do Usuário na Sidebar */
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--color-primary);
+}
+
+.user-info p {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: white;
+}
+
+.logout-btn {
+  background: none;
+  border: 1px solid #ff4444;
+  color: #ff4444;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: 0.2s;
+}
+.logout-btn:hover {
+  background: #ff4444;
+  color: white;
+}
+
+/* =========================================
+   6. COMPONENTES DE UI (CARDS, BUTTONS, INPUTS)
+   ========================================= */
+
+/* Cards 3D */
+.card {
+  background: var(--color-bg-card);
+  padding: 1.5rem;
+  border-radius: 14px;
+  border: 1px solid #2a2a2a;
+  box-shadow: var(--shadow-card);
+  transition: 0.2s ease-in-out;
+}
+.card:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-3px); /* Efeito de elevação */
+}
+
+/* Botão Primário (Gradiente Neon) */
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-primary), #d00000);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 10px rgba(255, 68, 68, 0.2);
+  transition: 0.3s;
+}
+.btn-primary:hover {
+  transform: scale(1.02);
+  opacity: 1;
+  box-shadow: 0 0 15px rgba(255, 68, 68, 0.5);
+}
+
+/* Botão Secundário (Outline) */
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  padding: 8px 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.btn-secondary:hover {
+  border-color: var(--color-primary);
+  color: white;
+}
+
+/* Inputs Gerais (Dark Theme) */
+.dark-input {
+  background: #151515;
+  border: 1px solid #333;
+  padding: 12px;
+  color: white;
+  border-radius: 8px;
+  outline: none;
+  width: 100%;
+  transition: 0.3s;
+}
+.dark-input:focus {
+  border-color: var(--color-primary);
+}
+
+/* =========================================
+   7. PÁGINA DE AGENDAMENTOS
+   Estilos específicos para listas, filtros e status.
+   ========================================= */
+.filters-bar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  background: #151515;
+  padding: 0 15px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  flex: 1;
+  height: 45px;
+}
+.search-box input {
+  background: transparent;
+  border: none;
+  color: white;
+  width: 100%;
+  margin-left: 10px;
+  outline: none;
+}
+
+.schedule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Cartão de Agendamento (Grid Layout) */
+.schedule-card {
+  display: grid;
+  /* Colunas: Avatar/Nome | Status | Serviço | Data/Hora | Preço/Ação */
+  grid-template-columns: 2fr 1fr 1.5fr 1.5fr 1fr;
+  align-items: center;
+  background: linear-gradient(145deg, #181818, #202020);
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #2a2a2a;
+  transition: 0.2s;
+}
+.schedule-card:hover {
+  border-color: var(--color-primary);
+  transform: translateX(5px);
+  background: #222;
+}
+
+/* Seção Cliente (Avatar + Nome + Select) */
+.client-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.client-section img {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  border: 2px solid #333;
+  object-fit: cover;
+}
+.client-section h4 {
+  color: white;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Select de Status (Pílula) */
+.status-select {
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  border: 1px solid #444;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+.status-select option {
+  background: #1a1a1a;
+  color: white;
+}
+
+/* Infos e Destaques */
+.info-section p,
+.time-section div {
+  color: #a0a0a0;
+  font-size: 0.9rem;
+}
+.highlight-time {
+  color: white !important;
+  font-weight: bold;
+  margin-top: 4px;
+}
+
+/* Preço e Botão Delete */
+.price-section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 15px;
+}
+.price-section h3 {
+  color: var(--color-success);
+  font-size: 1.1rem;
+  margin: 0;
+  white-space: nowrap;
+  text-shadow: 0 0 8px rgba(65, 241, 182, 0.2);
+}
+
+.delete-btn-icon {
+  background: transparent;
+  border: 1px solid #444;
+  color: #ff4444;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.delete-btn-icon:hover {
+  background: #ff4444;
+  color: white;
+  border-color: #ff4444;
+}
+
+/* =========================================
+   8. DASHBOARD HOME (GRÁFICOS, KPIs E TIMER)
+   ========================================= */
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 1.5rem;
+}
+.dashboard-grid .chart-area {
+  grid-column: 1 / -1;
+  height: 350px;
+}
+
+/* Cards de KPI (Indicadores) */
+.kpi-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.kpi-info h2 {
+  font-size: 2rem;
+  margin: 5px 0;
+  color: white;
+}
+.kpi-icon {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 12px;
+  border-radius: 12px;
+  color: var(--color-accent-blue);
+}
+
+/* Cronômetro (HaircutTimer) */
+.timer-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #1e1e1e, #252525);
+  overflow: hidden;
+}
+
+.digital-clock {
+  font-family: "Courier New", monospace;
+  font-size: 3.5rem;
+  color: white;
+  margin: 10px 0;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+.digital-clock.active-clock {
+  color: var(--color-primary);
+  text-shadow: 0 0 15px rgba(255, 68, 68, 0.4);
+}
+
+.timer-controls {
+  display: flex;
+  gap: 15px;
+}
+.timer-controls button {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+}
+
+.btn-play {
+  background: var(--color-success);
+  color: black;
+}
+.btn-pause {
+  background: var(--color-warning);
+  color: black;
+}
+.btn-reset {
+  background: #333;
+  color: white;
+  border: 1px solid #555;
+}
+
+.btn-play:hover,
+.btn-pause:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+/* =========================================
+   9. MODAIS, FORMULÁRIOS & CONFIGURAÇÕES
+   ========================================= */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s;
+}
+
+.modal-content {
+  background: #1e1e1e;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  border: 1px solid #333;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #333;
+  padding-bottom: 1rem;
+}
+.modal-header h2 {
+  color: white;
+  font-size: 1.5rem;
+  margin: 0;
+}
+.modal-header button {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+}
+.modal-header button:hover {
+  color: #ff4444;
+}
+
+/* Formulários Internos */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 1rem;
+  flex: 1;
+}
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+.form-group label {
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+/* Página de Configurações */
+.settings-container {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.settings-sidebar {
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.settings-item {
+  padding: 12px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #888;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  transition: 0.2s;
+}
+.settings-item:hover,
+.settings-item.active {
+  background: var(--color-bg-secondary);
+  color: white;
+  border-left: 3px solid var(--color-primary);
+}
+
+.settings-content {
+  flex: 1;
+  padding: 2.5rem;
+  background: var(--color-bg-secondary);
+  border-radius: 12px;
+}
+
+/* Item da Lista de Serviços (Config) */
+.service-item-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr auto;
+  gap: 15px;
+  align-items: end;
+  background: #181818;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  margin-bottom: 10px;
+}
+.service-item-row:hover {
+  border-color: var(--color-primary);
+}
+
+/* =========================================
+   10. MEDIA QUERIES (RESPONSIVIDADE)
+   Ajustes para Tablets e Mobile.
+   ========================================= */
+
+/* Tablets / Telas Médias */
+@media (max-width: 1024px) {
+  .dashboard-grid,
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+  .analytics-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Ajuste do card de agendamento */
+  .schedule-card {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .client-section {
+    grid-column: span 2;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+  }
+  .price-section {
+    grid-column: span 2;
+    justify-content: space-between;
+    border-top: 1px solid #333;
+    padding-top: 10px;
+  }
+  .chart-area {
+    grid-column: span 2;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+  } /* Remove Sidebar Grid */
+  .sidebar {
+    display: none;
+  } /* Esconde Sidebar */
+
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+  .chart-area {
+    grid-column: span 1;
+  }
+
+  /* Configurações em Mobile */
+  .settings-container {
+    flex-direction: column;
+  }
+  .settings-sidebar {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+  }
+}
+
+/* Ajustes finos do Login em telas maiores */
+@media (min-width: 768px) {
+  .login-container form {
+    padding: 2rem;
+  }
+  .login-container h2 {
+    font-size: 1.6rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .login-container form {
+    max-width: 420px;
+  }
+}

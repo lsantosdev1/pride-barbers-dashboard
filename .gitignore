@@ -1,0 +1,15 @@
+# Ignorar dependências em qualquer pasta
+**/node_modules
+node_modules/
+
+# Ignorar builds
+dist/
+build/
+
+# Ignorar arquivos de ambiente (segurança)
+.env
+.env.local
+
+# Logs
+*.log
+.DS_Store

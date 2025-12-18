@@ -1,0 +1,138 @@
+/* Variáveis e estilos globais do projeto */
+:root {
+  /* Fonte padrão do site */
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+
+  /* Altura da linha do texto */
+  line-height: 1.5;
+
+  /* Peso padrão da fonte */
+  font-weight: 400;
+
+  /* Permite suporte a modo claro e escuro */
+  color-scheme: light dark;
+
+  /* Cor padrão do texto */
+  color: rgba(255, 255, 255, 0.87);
+
+  /* Cor de fundo padrão */
+  background-color: #242424;
+
+  /* Evita criação artificial de estilos da fonte */
+  font-synthesis: none;
+
+  /* Melhora a leitura do texto */
+  text-rendering: optimizeLegibility;
+
+  /* Suavização da fonte no Chrome / Safari */
+  -webkit-font-smoothing: antialiased;
+
+  /* Suavização da fonte no macOS */
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Estilo padrão dos links */
+a {
+  /* Deixa o texto um pouco mais forte */
+  font-weight: 500;
+
+  /* Cor do link */
+  color: #646cff;
+
+  /* Remove sublinhado padrão */
+  text-decoration: inherit;
+}
+
+/* Estilo do link ao passar o mouse */
+a:hover {
+  color: #535bf2;
+}
+
+/* Estilos do corpo da página */
+body {
+  /* Remove margens padrão do navegador */
+  margin: 0;
+
+  /* Usa flexbox para alinhar conteúdo */
+  display: flex;
+
+  /* Centraliza conteúdo vertical e horizontalmente */
+  place-items: center;
+
+  /* Largura mínima para evitar quebra em telas pequenas */
+  min-width: 320px;
+
+  /* Altura mínima igual à altura da tela */
+  min-height: 100vh;
+}
+
+/* Estilo dos títulos h1 */
+h1 {
+  /* Tamanho grande do título */
+  font-size: 3.2em;
+
+  /* Espaçamento entre linhas do título */
+  line-height: 1.1;
+}
+
+/* Estilo padrão dos botões */
+button {
+  /* Bordas arredondadas */
+  border-radius: 8px;
+
+  /* Borda invisível para evitar layout shift */
+  border: 1px solid transparent;
+
+  /* Espaçamento interno */
+  padding: 0.6em 1.2em;
+
+  /* Tamanho da fonte */
+  font-size: 1em;
+
+  /* Peso da fonte */
+  font-weight: 500;
+
+  /* Usa a mesma fonte do site */
+  font-family: inherit;
+
+  /* Cor de fundo do botão */
+  background-color: #1a1a1a;
+
+  /* Muda o cursor para indicar clique */
+  cursor: pointer;
+
+  /* Animação suave na borda */
+  transition: border-color 0.25s;
+}
+
+/* Efeito ao passar o mouse no botão */
+button:hover {
+  border-color: #646cff;
+}
+
+/* Estilo quando o botão recebe foco */
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+/* Estilos para modo claro */
+@media (prefers-color-scheme: light) {
+  :root {
+    /* Cor do texto no modo claro */
+    color: #213547;
+
+    /* Fundo branco no modo claro */
+    background-color: #ffffff;
+  }
+
+  /* Cor do link ao passar o mouse no modo claro */
+  a:hover {
+    color: #747bff;
+  }
+
+  /* Cor do botão no modo claro */
+  button {
+    background-color: #f9f9f9;
+  }
+}
