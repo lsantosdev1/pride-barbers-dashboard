@@ -13,6 +13,8 @@ import { Mail, Lock } from "lucide-react";
 // Logo da aplicação
 import logo from "./assets/imgsalao3.png";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 // Componente de Login
 function Login({ setToken }) {
   // Estado para armazenar o email digitado
@@ -30,7 +32,7 @@ function Login({ setToken }) {
 
     try {
       // Envia email e senha para o backend
-      const response = await axios.post("http://localhost:3001/login", {
+      const response = await axios.post(`${API_BASE_URL}/login`, {
         email,
         password,
       });

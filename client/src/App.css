@@ -734,6 +734,12 @@ main {
   gap: 2rem;
   margin-top: 1rem;
 }
+.settings-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
 
 .settings-sidebar {
   width: 220px;

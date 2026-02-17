@@ -16,6 +16,8 @@ import {
   Plus,
 } from "lucide-react";
 
+const API_BASE_URL = "https://pride-barbers-api.onrender.com";
+
 // Componente de Configurações do Sistema
 function Configuracoes() {
   /* ===============================

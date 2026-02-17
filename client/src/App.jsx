@@ -52,7 +52,7 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
 );
 
 /* ==========================================================================
@@ -259,7 +259,7 @@ function App() {
           email: res.data.perfil.email,
           avatar: `https://ui-avatars.com/api/?name=${res.data.perfil.nome.replace(
             " ",
-            "+"
+            "+",
           )}&background=random`,
         });
       }
