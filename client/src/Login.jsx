@@ -2,7 +2,7 @@
 import { useState } from "react";
 
 // Biblioteca para requisições HTTP
-import axios from "axios";
+import api from "./api";
 
 // Hook para navegação entre rotas
 import { useNavigate } from "react-router-dom";
@@ -13,7 +13,8 @@ import { Mail, Lock } from "lucide-react";
 // Logo da aplicação
 import logo from "./assets/imgsalao3.png";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "https://pride-barbers-api.onrender.com";
 
 // Componente de Login
 function Login({ setToken }) {
@@ -32,7 +33,7 @@ function Login({ setToken }) {
 
     try {
       // Envia email e senha para o backend
-      const response = await axios.post(`${API_BASE_URL}/login`, {
+      const response = await api.post("/login", {
         email,
         password,
       });

@@ -63,9 +63,9 @@ O sistema se adapta à barbearia, não o contrário.
 
 ## 📸 Screenshots
 
-|            Tela de Login            |
-| :---------------------------------: |
-| ![Login](https://imgur.com/K04Vz68) |
+|                    Tela de Login                     |
+| :--------------------------------------------------: |
+| ![Login]([img]https://i.imgur.com/AfRKjDH.png[/img]) |
 
 ---
 

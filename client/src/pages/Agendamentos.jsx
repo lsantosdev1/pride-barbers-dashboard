@@ -11,9 +11,6 @@ import {
   Save,
 } from "lucide-react";
 
-// Constante para facilitar manutenção da URL da API
-const API_BASE_URL = "https://pride-barbers-api.onrender.com";
-
 function Agendamentos() {
   // =================================================================
   // 1. ESTADOS (STATES)

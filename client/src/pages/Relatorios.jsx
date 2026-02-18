@@ -10,7 +10,6 @@ import {
 import { Bar } from "react-chartjs-2";
 
 // Constante para centralizar a URL da API
-const API_BASE_URL = "https://pride-barbers-api.onrender.com";
 
 function Relatorios() {
   // =================================================================

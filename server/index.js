@@ -1,7 +1,6 @@
 /* ==========================================================================
    PROJETO: PRIDE BARBERS - BACKEND API
    DESCRIÇÃO: API REST com autenticação JWT
-   AUTOR: Pride Barbers
    ========================================================================== */
 
 const express = require("express");
@@ -10,21 +9,14 @@ const jwt = require("jsonwebtoken");
 
 const app = express();
 
-/* --------------------------------------------------------------------------
-   CONFIGURAÇÕES
--------------------------------------------------------------------------- */
+/* --- CONFIGURAÇÕES E MIDDLEWARES --- */
 const PORT = process.env.PORT || 3001;
 const SECRET_KEY = "pride_barbers_secret_key";
 
-/* --------------------------------------------------------------------------
-   MIDDLEWARES
--------------------------------------------------------------------------- */
 app.use(express.json());
 app.use(cors());
 
-/* --------------------------------------------------------------------------
-   MOCK DATABASE (MEMÓRIA)
--------------------------------------------------------------------------- */
+/* --- MOCK DATABASE (DADOS EM MEMÓRIA) --- */
 let configuracoes = {
   horarios: { abertura: "09:00", fechamento: "20:00" },
   dadosBarbearia: {
@@ -60,37 +52,27 @@ let servicos = [
   { id: 4, nome: "Platinado", preco: "80,00" },
 ];
 
-/* --------------------------------------------------------------------------
-   MIDDLEWARE DE AUTENTICAÇÃO
--------------------------------------------------------------------------- */
+/* --- MIDDLEWARE DE AUTENTICAÇÃO --- */
 function autenticarToken(req, res, next) {
   const authHeader = req.headers.authorization;
-
   if (!authHeader)
     return res.status(401).json({ message: "Token não informado" });
 
   const token = authHeader.split(" ")[1];
-
   jwt.verify(token, SECRET_KEY, (err, decoded) => {
     if (err)
       return res.status(401).json({ message: "Token inválido ou expirado" });
-
     req.user = decoded;
     next();
   });
 }
 
-/* --------------------------------------------------------------------------
-   LOGIN
--------------------------------------------------------------------------- */
+/* --- ROTA PÚBLICA: LOGIN --- */
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
 
   if (email === "admin" && password === "admin") {
-    const token = jwt.sign({ role: "admin" }, SECRET_KEY, {
-      expiresIn: "1h",
-    });
-
+    const token = jwt.sign({ role: "admin" }, SECRET_KEY, { expiresIn: "1h" });
     return res.json({
       auth: true,
       token,
@@ -100,28 +82,37 @@ app.post("/login", (req, res) => {
       },
     });
   }
-
   res.status(401).json({ auth: false, message: "Credenciais inválidas" });
 });
 
-/* --------------------------------------------------------------------------
-   ROTAS PROTEGIDAS
--------------------------------------------------------------------------- */
-app.get("/config", autenticarToken, (req, res) => {
-  res.json(configuracoes);
-});
+/* --- CRUD: CONFIGURAÇÕES (Protegidas) --- */
+app.get("/config", autenticarToken, (req, res) => res.json(configuracoes));
 
 app.put("/config", autenticarToken, (req, res) => {
   const { horarios, dadosBarbearia, perfil } = req.body;
   if (horarios) configuracoes.horarios = horarios;
   if (dadosBarbearia) configuracoes.dadosBarbearia = dadosBarbearia;
   if (perfil) configuracoes.perfil = perfil;
-
   res.json({ message: "Configurações atualizadas", configuracoes });
 });
 
-app.get("/agendamentos", autenticarToken, (req, res) => res.json(agendamentos));
+// LISTAR TODOS
+app.get("/agendamentos", autenticarToken, (req, res) => {
+  res.json(agendamentos);
+});
 
+// BUSCAR POR ID
+app.get("/agendamentos/:id", autenticarToken, (req, res) => {
+  const { id } = req.params;
+  const agendamento = agendamentos.find((a) => a.id == id);
+
+  if (!agendamento)
+    return res.status(404).json({ message: "Agendamento não encontrado" });
+
+  res.json(agendamento);
+});
+
+// CRIAR
 app.post("/agendamentos", autenticarToken, (req, res) => {
   const novo = {
     id: Date.now(),
@@ -137,38 +128,85 @@ app.post("/agendamentos", autenticarToken, (req, res) => {
   res.status(201).json(novo);
 });
 
-app.get("/servicos", autenticarToken, (req, res) => res.json(servicos));
+// ATUALIZAR
+app.put("/agendamentos/:id", autenticarToken, (req, res) => {
+  const { id } = req.params;
+  const index = agendamentos.findIndex((a) => a.id == id);
 
-/* --------------------------------------------------------------------------
-   START
--------------------------------------------------------------------------- */
-app.listen(PORT, () => console.log(`🔥 Backend rodando na porta ${PORT}`));
+  if (index === -1)
+    return res.status(404).json({ message: "Agendamento não encontrado" });
 
-// Rota para CRIAR um novo serviço
+  agendamentos[index] = { ...agendamentos[index], ...req.body };
+
+  res.json(agendamentos[index]);
+});
+
+// DELETAR
+app.delete("/agendamentos/:id", autenticarToken, (req, res) => {
+  const { id } = req.params;
+
+  const existe = agendamentos.some((a) => a.id == id);
+
+  if (!existe)
+    return res.status(404).json({ message: "Agendamento não encontrado" });
+
+  agendamentos = agendamentos.filter((a) => a.id != id);
+
+  res.json({ message: "Agendamento removido com sucesso" });
+});
+
+// LISTAR
+app.get("/servicos", autenticarToken, (req, res) => {
+  res.json(servicos);
+});
+
+// BUSCAR POR ID
+app.get("/servicos/:id", autenticarToken, (req, res) => {
+  const { id } = req.params;
+  const servico = servicos.find((s) => s.id == id);
+
+  if (!servico)
+    return res.status(404).json({ message: "Serviço não encontrado" });
+
+  res.json(servico);
+});
+
+// CRIAR
 app.post("/servicos", autenticarToken, (req, res) => {
   const novoServico = {
-    id: Date.now(), // Gera um ID único baseado no tempo
+    id: Date.now(),
     ...req.body,
   };
+
   servicos.push(novoServico);
   res.status(201).json(novoServico);
 });
 
-// Rota para ATUALIZAR um serviço existente
+// ATUALIZAR
 app.put("/servicos/:id", autenticarToken, (req, res) => {
   const { id } = req.params;
   const index = servicos.findIndex((s) => s.id == id);
 
-  if (index !== -1) {
-    servicos[index] = { ...servicos[index], ...req.body };
-    return res.json(servicos[index]);
-  }
-  res.status(404).json({ message: "Serviço não encontrado" });
+  if (index === -1)
+    return res.status(404).json({ message: "Serviço não encontrado" });
+
+  servicos[index] = { ...servicos[index], ...req.body };
+
+  res.json(servicos[index]);
 });
 
-// Rota para DELETAR um serviço
+// DELETAR
 app.delete("/servicos/:id", autenticarToken, (req, res) => {
   const { id } = req.params;
+
+  const existe = servicos.some((s) => s.id == id);
+
+  if (!existe)
+    return res.status(404).json({ message: "Serviço não encontrado" });
+
   servicos = servicos.filter((s) => s.id != id);
+
   res.json({ message: "Serviço removido com sucesso" });
 });
+
+app.listen(PORT, () => console.log(`🔥 Backend rodando na porta ${PORT}`));
