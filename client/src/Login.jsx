@@ -85,8 +85,8 @@ function Login({ setToken }) {
         <div className="input-group">
           <Mail size={20} className="input-icon" />
           <input
-            type="email"
-            placeholder="Email"
+            type="text"
+            placeholder="Usuário"
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>

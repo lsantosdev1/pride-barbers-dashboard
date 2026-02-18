@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../api";
 import {
   Download,
   DollarSign,
@@ -63,8 +63,8 @@ function Relatorios() {
     try {
       // Busca agendamentos e configurações em paralelo para otimizar tempo
       const [resAgendamentos, resConfig] = await Promise.all([
-        axios.get(`${API_BASE_URL}/agendamentos`),
-        axios.get(`${API_BASE_URL}/config`),
+        api.get("/agendamentos"),
+        api.get("/config"),
       ]);
 
       setTodosAgendamentos(resAgendamentos.data);

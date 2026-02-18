@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../api";
 import {
   Plus,
   Search,
@@ -51,8 +51,8 @@ function Agendamentos() {
       setLoading(true);
       // Promise.all executa as requisições em paralelo para maior performance
       const [resAgendamentos, resServicos] = await Promise.all([
-        axios.get(`${API_BASE_URL}/agendamentos`),
-        axios.get(`${API_BASE_URL}/servicos`),
+        api.get("/agendamentos"),
+        api.get("/servicos"),
       ]);
 
       setAgendamentos(resAgendamentos.data);
@@ -82,15 +82,15 @@ function Agendamentos() {
   const atualizarStatus = async (id, novoStatus) => {
     try {
       // 1. Atualiza no Backend
-      await axios.put(`${API_BASE_URL}/agendamentos/${id}`, {
+      await api.put(`/agendamentos/${id}`, {
         status: novoStatus,
       });
 
       // 2. Atualiza o estado local para refletir na UI imediatamente
       setAgendamentos((prev) =>
         prev.map((item) =>
-          item.id === id ? { ...item, status: novoStatus } : item
-        )
+          item.id === id ? { ...item, status: novoStatus } : item,
+        ),
       );
     } catch (error) {
       alert("Erro ao atualizar status. Tente novamente.");
@@ -112,10 +112,7 @@ function Agendamentos() {
     }
 
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/agendamentos`,
-        novoAgendamento
-      );
+      const response = await api.post("/agendamentos", novoAgendamento);
 
       // Adiciona o novo item à lista e fecha o modal
       setAgendamentos([...agendamentos, response.data]);
@@ -129,7 +126,7 @@ function Agendamentos() {
   const deletarAgendamento = async (id) => {
     if (window.confirm("Tem certeza que deseja excluir este agendamento?")) {
       try {
-        await axios.delete(`${API_BASE_URL}/agendamentos/${id}`);
+        await api.delete(`/agendamentos/${id}`);
         setAgendamentos((prev) => prev.filter((item) => item.id !== id));
       } catch (error) {
         alert("Erro ao deletar agendamento.");

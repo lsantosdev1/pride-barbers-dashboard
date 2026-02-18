@@ -15,7 +15,7 @@ import {
 } from "react-router-dom";
 
 // 2. Requisições HTTP
-import axios from "axios";
+import api from "./api"; // Importa a configuração que acabamos de criar
 
 // 3. Biblioteca de Gráficos (Chart.js)
 import {
@@ -77,9 +77,10 @@ function DashboardHome() {
   const carregarDadosDashboard = async () => {
     try {
       // Busca dados em paralelo (Performance)
+      // Antes: axios.get(`${API_BASE_URL}/agendamentos`)
       const [resAgendamentos, resConfig] = await Promise.all([
-        axios.get(`${API_BASE_URL}/agendamentos`),
-        axios.get(`${API_BASE_URL}/config`),
+        api.get("/agendamentos"),
+        api.get("/config"),
       ]);
 
       const lista = resAgendamentos.data;
@@ -252,7 +253,7 @@ function App() {
   // --- BUSCA DADOS DO USUÁRIO ---
   const carregarUsuario = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/config`);
+      const res = await api.get("/config");
       if (res.data.perfil) {
         setUser({
           nome: res.data.perfil.nome,
