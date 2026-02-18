@@ -143,3 +143,32 @@ app.get("/servicos", autenticarToken, (req, res) => res.json(servicos));
    START
 -------------------------------------------------------------------------- */
 app.listen(PORT, () => console.log(`🔥 Backend rodando na porta ${PORT}`));
+
+// Rota para CRIAR um novo serviço
+app.post("/servicos", autenticarToken, (req, res) => {
+  const novoServico = {
+    id: Date.now(), // Gera um ID único baseado no tempo
+    ...req.body,
+  };
+  servicos.push(novoServico);
+  res.status(201).json(novoServico);
+});
+
+// Rota para ATUALIZAR um serviço existente
+app.put("/servicos/:id", autenticarToken, (req, res) => {
+  const { id } = req.params;
+  const index = servicos.findIndex((s) => s.id == id);
+
+  if (index !== -1) {
+    servicos[index] = { ...servicos[index], ...req.body };
+    return res.json(servicos[index]);
+  }
+  res.status(404).json({ message: "Serviço não encontrado" });
+});
+
+// Rota para DELETAR um serviço
+app.delete("/servicos/:id", autenticarToken, (req, res) => {
+  const { id } = req.params;
+  servicos = servicos.filter((s) => s.id != id);
+  res.json({ message: "Serviço removido com sucesso" });
+});
