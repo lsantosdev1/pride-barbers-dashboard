@@ -1,56 +1,67 @@
 /* ==========================================================================
    PROJETO: PRIDE BARBERS - BACKEND API
-   DESCRIÇÃO: API REST com autenticação JWT
+   DESCRIÇÃO: API REST com MongoDB Atlas e Autenticação JWT
    ========================================================================== */
 
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
 
 const app = express();
 
-/* --- CONFIGURAÇÕES E MIDDLEWARES --- */
+/* --- CONFIGURAÇÕES --- */
 const PORT = process.env.PORT || 3001;
 const SECRET_KEY = "pride_barbers_secret_key";
 
+// Use a variável de ambiente no Render ou o link direto para teste local
+const DATABASE_URL =
+  process.env.DATABASE_URL ||
+  "mongodb+srv://lsantos2152_db_user:qhRvWdnje49LtlLU@cluster0.mskhodx.mongodb.net/pride_barbers?retryWrites=true&w=majority";
+
+/* --- CONEXÃO MONGODB --- */
+mongoose
+  .connect(DATABASE_URL)
+  .then(() => console.log("✅ Conectado com sucesso ao MongoDB Atlas!"))
+  .catch((err) => console.error("❌ Erro ao conectar ao MongoDB:", err));
+
+/* --- MIDDLEWARES --- */
 app.use(express.json());
 app.use(cors());
 
-/* --- MOCK DATABASE (DADOS EM MEMÓRIA) --- */
-let configuracoes = {
-  horarios: { abertura: "09:00", fechamento: "20:00" },
+/* --- MODELOS DE DADOS (SCHEMAS) --- */
+
+// Schema de Configurações
+const configuracaoSchema = new mongoose.Schema({
+  horarios: { abertura: String, fechamento: String },
   dadosBarbearia: {
-    nome: "Pride Barbers",
-    endereco: "Rua das Navais, 123 - Centro",
-    telefone: "(11) 99999-0000",
-    email: "contato@pridebarbers.com",
+    nome: String,
+    endereco: String,
+    telefone: String,
+    email: String,
   },
-  perfil: {
-    nome: "Mestre Barbeiro",
-    email: "admin@admin.com",
-  },
-};
+  perfil: { nome: String, email: String },
+});
+const Configuracao = mongoose.model("Configuracao", configuracaoSchema);
 
-let agendamentos = [
-  {
-    id: 1,
-    nome: "João Silva",
-    servico: "Corte + Barba",
-    status: "Agendado",
-    horario: "09:00",
-    data: "2025-07-30",
-    preco: "R$ 55,00",
-    avatar:
-      "https://ui-avatars.com/api/?name=Joao+Silva&background=0D8ABC&color=fff",
-  },
-];
+// Schema de Agendamentos
+const agendamentoSchema = new mongoose.Schema({
+  nome: String,
+  servico: String,
+  status: { type: String, default: "Agendado" },
+  horario: String,
+  data: String,
+  preco: String,
+  avatar: String,
+});
+const Agendamento = mongoose.model("Agendamento", agendamentoSchema);
 
-let servicos = [
-  { id: 1, nome: "Corte Masculino", preco: "35,00" },
-  { id: 2, nome: "Barba", preco: "25,00" },
-  { id: 3, nome: "Corte + Barba", preco: "60,00" },
-  { id: 4, nome: "Platinado", preco: "80,00" },
-];
+// Schema de Serviços
+const servicoSchema = new mongoose.Schema({
+  nome: String,
+  preco: String,
+});
+const Servico = mongoose.model("Servico", servicoSchema);
 
 /* --- MIDDLEWARE DE AUTENTICAÇÃO --- */
 function autenticarToken(req, res, next) {
@@ -68,145 +79,134 @@ function autenticarToken(req, res, next) {
 }
 
 /* --- ROTA PÚBLICA: LOGIN --- */
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
+  // Login fixo conforme seu projeto original
   if (email === "admin" && password === "admin") {
     const token = jwt.sign({ role: "admin" }, SECRET_KEY, { expiresIn: "1h" });
+
+    // Busca as configurações atuais para retornar o nome do perfil
+    const config = (await Configuracao.findOne()) || {
+      perfil: { nome: "Mestre Barbeiro", email: "admin@admin.com" },
+    };
+
     return res.json({
       auth: true,
       token,
       user: {
-        nome: configuracoes.perfil.nome,
-        email: configuracoes.perfil.email,
+        nome: config.perfil.nome,
+        email: config.perfil.email,
       },
     });
   }
   res.status(401).json({ auth: false, message: "Credenciais inválidas" });
 });
 
-/* --- CRUD: CONFIGURAÇÕES (Protegidas) --- */
-app.get("/config", autenticarToken, (req, res) => res.json(configuracoes));
-
-app.put("/config", autenticarToken, (req, res) => {
-  const { horarios, dadosBarbearia, perfil } = req.body;
-  if (horarios) configuracoes.horarios = horarios;
-  if (dadosBarbearia) configuracoes.dadosBarbearia = dadosBarbearia;
-  if (perfil) configuracoes.perfil = perfil;
-  res.json({ message: "Configurações atualizadas", configuracoes });
+/* --- CRUD: CONFIGURAÇÕES --- */
+app.get("/config", autenticarToken, async (req, res) => {
+  let config = await Configuracao.findOne();
+  if (!config) {
+    // Se não existir, cria uma configuração padrão
+    config = await Configuracao.create({
+      horarios: { abertura: "09:00", fechamento: "20:00" },
+      dadosBarbearia: {
+        nome: "Pride Barbers",
+        endereco: "Rua das Navais, 123",
+        telefone: "(11) 99999-0000",
+        email: "contato@pridebarbers.com",
+      },
+      perfil: { nome: "Mestre Barbeiro", email: "admin@admin.com" },
+    });
+  }
+  res.json(config);
 });
+
+app.put("/config", autenticarToken, async (req, res) => {
+  const config = await Configuracao.findOneAndUpdate({}, req.body, {
+    new: true,
+    upsert: true,
+  });
+  res.json({ message: "Configurações atualizadas", configuracoes: config });
+});
+
+/* --- CRUD: AGENDAMENTOS --- */
 
 // LISTAR TODOS
-app.get("/agendamentos", autenticarToken, (req, res) => {
-  res.json(agendamentos);
-});
-
-// BUSCAR POR ID
-app.get("/agendamentos/:id", autenticarToken, (req, res) => {
-  const { id } = req.params;
-  const agendamento = agendamentos.find((a) => a.id == id);
-
-  if (!agendamento)
-    return res.status(404).json({ message: "Agendamento não encontrado" });
-
-  res.json(agendamento);
+app.get("/agendamentos", autenticarToken, async (req, res) => {
+  const lista = await Agendamento.find();
+  res.json(lista);
 });
 
 // CRIAR
-app.post("/agendamentos", autenticarToken, (req, res) => {
-  const novo = {
-    id: Date.now(),
-    status: "Agendado",
+app.post("/agendamentos", autenticarToken, async (req, res) => {
+  const novo = new Agendamento({
     ...req.body,
-    avatar: `https://ui-avatars.com/api/?name=${req.body.nome.replace(
-      " ",
-      "+",
-    )}&background=random`,
-  };
-
-  agendamentos.push(novo);
+    avatar: `https://ui-avatars.com/api/?name=${req.body.nome.replace(" ", "+")}&background=random`,
+  });
+  await novo.save();
   res.status(201).json(novo);
 });
 
 // ATUALIZAR
-app.put("/agendamentos/:id", autenticarToken, (req, res) => {
+app.put("/agendamentos/:id", autenticarToken, async (req, res) => {
   const { id } = req.params;
-  const index = agendamentos.findIndex((a) => a.id == id);
+  const atualizado = await Agendamento.findByIdAndUpdate(id, req.body, {
+    new: true,
+  });
 
-  if (index === -1)
+  if (!atualizado)
     return res.status(404).json({ message: "Agendamento não encontrado" });
-
-  agendamentos[index] = { ...agendamentos[index], ...req.body };
-
-  res.json(agendamentos[index]);
+  res.json(atualizado);
 });
 
 // DELETAR
-app.delete("/agendamentos/:id", autenticarToken, (req, res) => {
+app.delete("/agendamentos/:id", autenticarToken, async (req, res) => {
   const { id } = req.params;
+  const deletado = await Agendamento.findByIdAndDelete(id);
 
-  const existe = agendamentos.some((a) => a.id == id);
-
-  if (!existe)
+  if (!deletado)
     return res.status(404).json({ message: "Agendamento não encontrado" });
-
-  agendamentos = agendamentos.filter((a) => a.id != id);
-
   res.json({ message: "Agendamento removido com sucesso" });
 });
 
+/* --- CRUD: SERVIÇOS --- */
+
 // LISTAR
-app.get("/servicos", autenticarToken, (req, res) => {
-  res.json(servicos);
-});
-
-// BUSCAR POR ID
-app.get("/servicos/:id", autenticarToken, (req, res) => {
-  const { id } = req.params;
-  const servico = servicos.find((s) => s.id == id);
-
-  if (!servico)
-    return res.status(404).json({ message: "Serviço não encontrado" });
-
-  res.json(servico);
+app.get("/servicos", autenticarToken, async (req, res) => {
+  const lista = await Servico.find();
+  res.json(lista);
 });
 
 // CRIAR
-app.post("/servicos", autenticarToken, (req, res) => {
-  const novoServico = {
-    id: Date.now(),
-    ...req.body,
-  };
-
-  servicos.push(novoServico);
+app.post("/servicos", autenticarToken, async (req, res) => {
+  const novoServico = await Servico.create(req.body);
   res.status(201).json(novoServico);
 });
 
 // ATUALIZAR
-app.put("/servicos/:id", autenticarToken, (req, res) => {
+app.put("/servicos/:id", autenticarToken, async (req, res) => {
   const { id } = req.params;
-  const index = servicos.findIndex((s) => s.id == id);
+  const atualizado = await Servico.findByIdAndUpdate(id, req.body, {
+    new: true,
+  });
 
-  if (index === -1)
+  if (!atualizado)
     return res.status(404).json({ message: "Serviço não encontrado" });
-
-  servicos[index] = { ...servicos[index], ...req.body };
-
-  res.json(servicos[index]);
+  res.json(atualizado);
 });
 
 // DELETAR
-app.delete("/servicos/:id", autenticarToken, (req, res) => {
+app.delete("/servicos/:id", autenticarToken, async (req, res) => {
   const { id } = req.params;
+  const deletado = await Servico.findByIdAndDelete(id);
 
-  const existe = servicos.some((s) => s.id == id);
-
-  if (!existe)
+  if (!deletado)
     return res.status(404).json({ message: "Serviço não encontrado" });
-
-  servicos = servicos.filter((s) => s.id != id);
-
   res.json({ message: "Serviço removido com sucesso" });
 });
 
-app.listen(PORT, () => console.log(`🔥 Backend rodando na porta ${PORT}`));
+/* --- INICIALIZAÇÃO --- */
+app.listen(PORT, () =>
+  console.log(`🔥 Backend Pride Barbers rodando na porta ${PORT}`),
+);
