@@ -42,9 +42,6 @@ import Configuracoes from "./pages/Configuracoes";
 // 6. Estilos
 import "./App.css";
 
-// --- CONFIGURAÇÕES GERAIS ---
-const API_BASE_URL = "https://pride-barbers-api.onrender.com";
-
 // Registro dos módulos do Chart.js
 ChartJS.register(
   CategoryScale,
@@ -223,12 +220,29 @@ function DashboardHome() {
    Estrutura fixa (Sidebar + Conteúdo) para usuários logados.
    ========================================================================== */
 function MainLayout({ handleLogout, user, atualizarUsuario }) {
+  // Estado para controlar se o menu mobile está visível
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
   return (
-    <div className="dashboard-layout">
-      {/* Sidebar recebe dados do usuário dinâmico */}
+    <div className={`dashboard-layout ${isMenuOpen ? "menu-open" : ""}`}>
+      {/* Botão Hambúrguer Neon */}
+      <button
+        className="mobile-menu-btn"
+        onClick={toggleMenu}
+        aria-label="Abrir menu"
+      >
+        {isMenuOpen ? "✕" : "☰"}
+      </button>
+
+      {/* Overlay: escurece o fundo ao abrir o menu no mobile */}
+      {isMenuOpen && <div className="menu-overlay" onClick={toggleMenu}></div>}
+
+      {/* A Sidebar agora reage à classe 'menu-open' do pai no CSS */}
       <Sidebar handleLogout={handleLogout} user={user} />
-      <main>
-        {/* Outlet passa a função de atualizar perfil para as páginas filhas */}
+
+      <main onClick={() => isMenuOpen && setIsMenuOpen(false)}>
         <Outlet context={{ atualizarUsuario }} />
       </main>
     </div>
