@@ -14,7 +14,6 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const SECRET_KEY = "pride_barbers_secret_key";
 
-// Use a variável de ambiente no Render ou o link direto para teste local
 const DATABASE_URL =
   process.env.DATABASE_URL ||
   "mongodb+srv://lsantos2152_db_user:qhRvWdnje49LtlLU@cluster0.mskhodx.mongodb.net/pride_barbers?retryWrites=true&w=majority";
@@ -25,13 +24,12 @@ mongoose
   .then(() => console.log("✅ Conectado com sucesso ao MongoDB Atlas!"))
   .catch((err) => console.error("❌ Erro ao conectar ao MongoDB:", err));
 
-/* --- MIDDLEWARES --- */
+/* --- MIDDLEWARES GERAIS --- */
 app.use(express.json());
 app.use(cors());
 
 /* --- MODELOS DE DADOS (SCHEMAS) --- */
 
-// Schema de Configurações
 const configuracaoSchema = new mongoose.Schema({
   horarios: { abertura: String, fechamento: String },
   dadosBarbearia: {
@@ -44,7 +42,6 @@ const configuracaoSchema = new mongoose.Schema({
 });
 const Configuracao = mongoose.model("Configuracao", configuracaoSchema);
 
-// Schema de Agendamentos
 const agendamentoSchema = new mongoose.Schema({
   nome: String,
   servico: String,
@@ -56,14 +53,13 @@ const agendamentoSchema = new mongoose.Schema({
 });
 const Agendamento = mongoose.model("Agendamento", agendamentoSchema);
 
-// Schema de Serviços
 const servicoSchema = new mongoose.Schema({
   nome: String,
   preco: String,
 });
 const Servico = mongoose.model("Servico", servicoSchema);
 
-/* --- MIDDLEWARE DE AUTENTICAÇÃO --- */
+/* --- MIDDLEWARE DE AUTENTICAÇÃO (Mover para cá para organização) --- */
 function autenticarToken(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader)
@@ -78,36 +74,68 @@ function autenticarToken(req, res, next) {
   });
 }
 
-/* --- ROTA PÚBLICA: LOGIN --- */
+/* --- ROTAS PÚBLICAS (Login e Clientes) --- */
+
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
-
-  // Login fixo conforme seu projeto original
   if (email === "admin" && password === "admin") {
     const token = jwt.sign({ role: "admin" }, SECRET_KEY, { expiresIn: "1h" });
-
-    // Busca as configurações atuais para retornar o nome do perfil
     const config = (await Configuracao.findOne()) || {
       perfil: { nome: "Mestre Barbeiro", email: "admin@admin.com" },
     };
-
     return res.json({
       auth: true,
       token,
-      user: {
-        nome: config.perfil.nome,
-        email: config.perfil.email,
-      },
+      user: { nome: config.perfil.nome, email: config.perfil.email },
     });
   }
   res.status(401).json({ auth: false, message: "Credenciais inválidas" });
 });
 
-/* --- CRUD: CONFIGURAÇÕES --- */
+app.get("/public/servicos", async (req, res) => {
+  try {
+    // 1. Tenta buscar os serviços no banco
+    let lista = await Servico.find();
+
+    // 2. Se não encontrar nenhum (lista vazia), cria os serviços padrão
+    if (lista.length === 0) {
+      console.log("⚠️ Banco vazio! Criando serviços padrão...");
+      const servicosPadrao = [
+        { nome: "Corte Masculino", preco: "35,00" },
+        { nome: "Barba", preco: "25,00" },
+        { nome: "Corte + Barba", preco: "55,00" },
+      ];
+      await Servico.insertMany(servicosPadrao);
+      // Busca novamente para garantir que agora temos os dados com os IDs do MongoDB
+      lista = await Servico.find();
+    }
+
+    // 3. SÓ AGORA enviamos a resposta para o Frontend
+    res.json(lista);
+  } catch (error) {
+    console.error("❌ Erro ao carregar serviços:", error);
+    res.status(500).json({ message: "Erro ao carregar serviços" });
+  }
+});
+app.post("/public/agendamentos", async (req, res) => {
+  try {
+    const novo = new Agendamento({
+      ...req.body,
+      status: "Agendado",
+      avatar: `https://ui-avatars.com/api/?name=${(req.body.nome || "Cliente").replace(" ", "+")}&background=random`,
+    });
+    await novo.save();
+    res.status(201).json(novo);
+  } catch (error) {
+    res.status(500).json({ message: "Erro ao realizar agendamento" });
+  }
+});
+
+/* --- ROTAS PROTEGIDAS (Admin) --- */
+
 app.get("/config", autenticarToken, async (req, res) => {
   let config = await Configuracao.findOne();
   if (!config) {
-    // Se não existir, cria uma configuração padrão
     config = await Configuracao.create({
       horarios: { abertura: "09:00", fechamento: "20:00" },
       dadosBarbearia: {
@@ -130,77 +158,61 @@ app.put("/config", autenticarToken, async (req, res) => {
   res.json({ message: "Configurações atualizadas", configuracoes: config });
 });
 
-/* --- CRUD: AGENDAMENTOS --- */
-
-// LISTAR TODOS
+// CRUD AGENDAMENTOS
 app.get("/agendamentos", autenticarToken, async (req, res) => {
   const lista = await Agendamento.find();
   res.json(lista);
 });
 
-// CRIAR
 app.post("/agendamentos", autenticarToken, async (req, res) => {
   const novo = new Agendamento({
     ...req.body,
-    avatar: `https://ui-avatars.com/api/?name=${req.body.nome.replace(" ", "+")}&background=random`,
+    avatar: `https://ui-avatars.com/api/?name=${(req.body.nome || "Admin").replace(" ", "+")}&background=random`,
   });
   await novo.save();
   res.status(201).json(novo);
 });
 
-// ATUALIZAR
 app.put("/agendamentos/:id", autenticarToken, async (req, res) => {
-  const { id } = req.params;
-  const atualizado = await Agendamento.findByIdAndUpdate(id, req.body, {
-    new: true,
-  });
-
+  const atualizado = await Agendamento.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true },
+  );
   if (!atualizado)
     return res.status(404).json({ message: "Agendamento não encontrado" });
   res.json(atualizado);
 });
 
-// DELETAR
 app.delete("/agendamentos/:id", autenticarToken, async (req, res) => {
-  const { id } = req.params;
-  const deletado = await Agendamento.findByIdAndDelete(id);
-
+  const deletado = await Agendamento.findByIdAndDelete(req.params.id);
   if (!deletado)
     return res.status(404).json({ message: "Agendamento não encontrado" });
   res.json({ message: "Agendamento removido com sucesso" });
 });
 
-/* --- CRUD: SERVIÇOS --- */
-
-// LISTAR
+// CRUD SERVIÇOS
 app.get("/servicos", autenticarToken, async (req, res) => {
   const lista = await Servico.find();
   res.json(lista);
 });
 
-// CRIAR
 app.post("/servicos", autenticarToken, async (req, res) => {
   const novoServico = await Servico.create(req.body);
   res.status(201).json(novoServico);
 });
 
-// ATUALIZAR
 app.put("/servicos/:id", autenticarToken, async (req, res) => {
-  const { id } = req.params;
-  const atualizado = await Servico.findByIdAndUpdate(id, req.body, {
+  const atualizado = await Servico.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
   });
-
   if (!atualizado)
     return res.status(404).json({ message: "Serviço não encontrado" });
   res.json(atualizado);
 });
 
-// DELETAR
 app.delete("/servicos/:id", autenticarToken, async (req, res) => {
-  const { id } = req.params;
-  const deletado = await Servico.findByIdAndDelete(id);
-
+  const deletado = await Servico.findByIdAndDelete(req.params.id);
   if (!deletado)
     return res.status(404).json({ message: "Serviço não encontrado" });
   res.json({ message: "Serviço removido com sucesso" });

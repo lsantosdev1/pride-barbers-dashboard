@@ -137,7 +137,7 @@ function Configuracoes() {
     if (window.confirm("Remover este serviço?")) {
       try {
         await api.delete(`/servicos/${id}`);
-        setServicos(servicos.filter((s) => s.id !== id));
+        setServicos(servicos.filter((s) => s._id !== id));
       } catch (error) {
         alert("Erro ao deletar serviço");
       }
@@ -147,17 +147,18 @@ function Configuracoes() {
   // Atualiza estado local ao editar campos
   const handleEditChange = (id, campo, valor) => {
     setServicos(
-      servicos.map((s) => (s.id === id ? { ...s, [campo]: valor } : s)),
+      servicos.map((s) => (s._id === id ? { ...s, [campo]: valor } : s)),
     );
   };
 
   // Salva edição do serviço ao perder foco
   const salvarEdicaoServico = async (servico) => {
+    if (!servico.nome || servico.nome === "Novo Serviço") return; // Evita salvar nomes genéricos
     try {
-      // ✅ JEITO CORRETO (Usando a variável)
-      await api.put(`/servicos/${servico.id}`, servico);
+      await api.put(`/servicos/${servico._id}`, servico);
+      console.log("Serviço atualizado!");
     } catch (error) {
-      console.error("Erro ao salvar edição do serviço");
+      console.error("Erro ao salvar edição");
     }
   };
 
@@ -265,13 +266,13 @@ function Configuracoes() {
 
             <div className="services-list">
               {servicos.map((servico) => (
-                <div key={servico.id} className="service-item-row">
+                <div key={servico._id} className="service-item-row">
                   <input
                     type="text"
                     className="dark-input small"
                     value={servico.nome}
                     onChange={(e) =>
-                      handleEditChange(servico.id, "nome", e.target.value)
+                      handleEditChange(servico._id, "nome", e.target.value)
                     }
                     onBlur={() => salvarEdicaoServico(servico)}
                   />
@@ -281,14 +282,14 @@ function Configuracoes() {
                     className="dark-input small"
                     value={servico.preco}
                     onChange={(e) =>
-                      handleEditChange(servico.id, "preco", e.target.value)
+                      handleEditChange(servico._id, "preco", e.target.value)
                     }
                     onBlur={() => salvarEdicaoServico(servico)}
                   />
 
                   <button
                     className="delete-btn-icon"
-                    onClick={() => deleteServico(servico.id)}
+                    onClick={() => deleteServico(servico._id)}
                   >
                     <Trash2 size={20} />
                   </button>

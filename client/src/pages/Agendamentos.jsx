@@ -86,7 +86,7 @@ function Agendamentos() {
       // 2. Atualiza o estado local para refletir na UI imediatamente
       setAgendamentos((prev) =>
         prev.map((item) =>
-          item.id === id ? { ...item, status: novoStatus } : item,
+          item._id === id ? { ...item, status: novoStatus } : item,
         ),
       );
     } catch (error) {
@@ -124,7 +124,7 @@ function Agendamentos() {
     if (window.confirm("Tem certeza que deseja excluir este agendamento?")) {
       try {
         await api.delete(`/agendamentos/${id}`);
-        setAgendamentos((prev) => prev.filter((item) => item.id !== id));
+        setAgendamentos((prev) => prev.filter((item) => item._id !== id));
       } catch (error) {
         alert("Erro ao deletar agendamento.");
       }
@@ -235,7 +235,7 @@ function Agendamentos() {
         </h3>
 
         {agendamentosFiltrados.map((item) => (
-          <div key={item.id} className="schedule-card">
+          <div key={item._id} className="schedule-card">
             {/* Coluna 1: Cliente e Status */}
             <div className="client-section">
               <img src={item.avatar} alt="Avatar do Cliente" />
@@ -245,7 +245,7 @@ function Agendamentos() {
                   className="status-select"
                   value={item.status}
                   style={getStatusStyle(item.status)}
-                  onChange={(e) => atualizarStatus(item.id, e.target.value)}
+                  onChange={(e) => atualizarStatus(item._id, e.target.value)}
                 >
                   <option value="Agendado">Agendado</option>
                   <option value="Em Andamento">Em Andamento</option>
@@ -273,7 +273,7 @@ function Agendamentos() {
             <div className="price-section">
               <h3>{item.preco}</h3>
               <button
-                onClick={() => deletarAgendamento(item.id)}
+                onClick={() => deletarAgendamento(item._id)}
                 title="Excluir Agendamento"
                 style={{
                   background: "none",
@@ -364,7 +364,7 @@ function Agendamentos() {
                   onChange={mudarServico}
                 >
                   {listaServicos.map((servico) => (
-                    <option key={servico.id} value={servico.nome}>
+                    <option key={servico._id} value={servico.nome}>
                       {servico.nome} - R$ {servico.preco}
                     </option>
                   ))}

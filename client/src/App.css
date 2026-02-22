@@ -225,10 +225,12 @@ main {
 
 /* Container de Página (Limita a largura) */
 .page-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding-bottom: 4rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 2rem;
   animation: fadeIn 0.4s ease-out; /* Animação de entrada suave */
+  overflow-y: auto;
 }
 
 @keyframes fadeIn {

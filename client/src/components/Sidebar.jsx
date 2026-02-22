@@ -1,5 +1,11 @@
 // Ícones utilizados no menu lateral
-import { LayoutDashboard, Calendar, FileText, Settings } from "lucide-react";
+import {
+  LayoutDashboard,
+  Calendar,
+  FileText,
+  Settings,
+  LogOut,
+} from "lucide-react";
 
 // Componente para navegação com controle automático de rota ativa
 import { NavLink } from "react-router-dom";
@@ -59,9 +65,14 @@ function Sidebar({ handleLogout, user }) {
           {/* Nome do usuário */}
           <p>{user.nome}</p>
 
-          {/* Botão de logout */}
-          <button onClick={handleLogout} className="logout-btn">
-            Sair
+          {/* Botão de logout com ícone */}
+          <button
+            onClick={handleLogout}
+            className="logout-btn"
+            style={{ display: "flex", alignItems: "center", gap: "8px" }}
+          >
+            <LogOut size={16} />
+            <span>Sair</span>
           </button>
         </div>
       </div>
