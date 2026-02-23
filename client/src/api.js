@@ -3,7 +3,7 @@ import axios from "axios";
 
 const api = axios.create({
   // Já deixamos a URL base aqui para não precisar repetir
-  baseURL: "https://pride-barbers-api.onrender.com",
+  baseURL: "https://pride-barbers-api.onrender.com/api",
 });
 
 // Interceptor: Executa antes de QUALQUER requisição sair
