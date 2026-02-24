@@ -205,7 +205,10 @@ function Agendar() {
             <span style={{ color: "#888", fontSize: "0.9rem" }}>
               Valor Estimado:
             </span>
-            <h2 style={{ color: "#41f1b6", margin: "5px 0" }}>
+            <h2
+              className="preco-destaque"
+              style={{ color: "#41f1b6", margin: "5px 0" }}
+            >
               {dadosAgendamento.preco}
             </h2>
           </div>
@@ -226,12 +229,12 @@ function Agendar() {
           </button>
         </form>
       </div>
-      {/* Espaçador para empurrar o footer para baixo em telas grandes */}
-      <div style={{ flex: 1 }}></div>
+      {/* Espaçador para empurrar o footer para baixo e m telas grandes */}
+      <div style={{ flex: 0.5 }}></div>
 
       <footer
         style={{
-          marginTop: "2rem",
+          marginTop: "1rem",
           textAlign: "center",
           padding: "1rem",
           width: "100%",
