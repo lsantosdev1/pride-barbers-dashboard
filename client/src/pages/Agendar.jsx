@@ -205,10 +205,7 @@ function Agendar() {
             <span style={{ color: "#888", fontSize: "0.9rem" }}>
               Valor Estimado:
             </span>
-            <h2
-              className="preco-destaque"
-              style={{ color: "#41f1b6", margin: "5px 0" }}
-            >
+            <h2 className="" style={{ color: "#41f1b6", margin: "5px 0" }}>
               {dadosAgendamento.preco}
             </h2>
           </div>
