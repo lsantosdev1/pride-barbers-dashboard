@@ -936,7 +936,7 @@ main {
   }
 }
 /* Ajuste apenas para telas pequenas (celulares) */
-@media (max-width: 350px) {
+@media (max-width: 850px) {
   /* Faz os inputs de Data e Hora ficarem um embaixo do outro */
   .form-row {
     flex-direction: column !important;
@@ -946,5 +946,7 @@ main {
   /* Garante que eles ocupem 100% da largura disponível */
   .form-row .form-group {
     width: 100% !important;
+    display: block !important;
+    margin-bottom: 10px; /* Adiciona um espaçamento entre os campos */
   }
 }
