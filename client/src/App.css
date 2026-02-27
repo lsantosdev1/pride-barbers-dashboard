@@ -1000,3 +1000,65 @@ main {
     padding: 12px 20px;
   }
 }
+/* ==========================================================================
+   SOLUÇÃO EXCLUSIVA PARA IOS (IPHONE/IPAD)
+   Este bloco é invisível para o Android.
+   ========================================================================== */
+
+@supports (-webkit-touch-callout: none) {
+  /* 1. Mata o scroll lateral (O "samba" da tela) */
+  html,
+  body,
+  #root,
+  .dashboard-layout {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    /* Evita que o iPhone tente 'adivinhar' a largura */
+    position: relative;
+  }
+
+  /* 2. Corrige Inputs de Data e Hora "Colados" */
+  /* No iOS, forçamos o empilhamento com margem manual */
+  .form-row {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+  }
+
+  .form-row .form-group {
+    width: 100% !important;
+    margin-bottom: 15px !important; /* Espaço real entre data e hora */
+  }
+
+  /* 3. Ajuste da Tela de Login */
+  /* Impede que o formulário de login estique no iPhone */
+  .login-container form {
+    width: 90% !important;
+    max-width: 340px !important;
+    padding: 1.5rem !important;
+    margin: 0 auto !important;
+  }
+
+  /* 4. Fonte Mágica (Evita o Zoom do Safari) */
+  /* Se a fonte for < 16px, o iPhone dá zoom e quebra o layout lateral */
+  input,
+  select,
+  textarea,
+  .dark-input {
+    font-size: 16px !important;
+  }
+
+  /* 5. Ajuste de Page Header (Título + Botão Novo) */
+  .page-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding-right: 50px !important; /* Respeita o botão hambúrguer */
+  }
+
+  /* 6. Distância e Respiro (Efeito 'Afastar' a tela) */
+  main {
+    padding: 1.2rem !important;
+  }
+}
