@@ -848,7 +848,7 @@ main {
   /* Botão Estilo Neon */
   :root {
     /* Diminuir a base de 16px para 14px ou 13px dá o efeito de 'zoom out' */
-    font-size: 10px;
+    font-size: 12px;
   }
   main {
     /* Aumentar o padding dá a sensação de que o conteúdo está mais longe das bordas do celular */
