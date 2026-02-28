@@ -1014,7 +1014,7 @@ main {
   .dashboard-layout {
     width: 100% !important;
     max-width: 100% !important;
-    overflow-x: hidden !important;
+
     /* Evita que o iPhone tente 'adivinhar' a largura */
     position: relative;
   }
@@ -1040,6 +1040,7 @@ main {
   .form-row .form-group {
     width: 100% !important;
     margin-bottom: 10px !important; /* Espaço real entre data e hora */
+    min-width: 0 !important; /* Evita que o iPhone tente expandir os campos */
   }
 
   /* 3. Ajuste da Tela de Login */
