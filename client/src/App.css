@@ -1048,6 +1048,7 @@ main {
   .login-container form {
     width: 90% !important;
     max-width: 340px !important;
+    backdrop-filter: blur(2px); /* Desfoque do fundo */
   }
   .login-container input {
     padding-left: 55px !important;
