@@ -1022,8 +1022,8 @@ main {
   /* 2. Corrige Inputs de Data e Hora "Colados" */
   /* No iOS, forçamos o empilhamento com margem manual */
   .form-row {
-    display: flex !important;
-    flex-direction: column !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
     gap: 0 !important;
   }
   .dark-input,
