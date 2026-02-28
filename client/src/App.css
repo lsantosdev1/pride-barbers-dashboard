@@ -1050,7 +1050,6 @@ main {
     width: 90% !important;
     max-width: 340px !important;
     padding: 1.5rem !important;
-    margin: 0 auto !important;
   }
 
   /* 4. Fonte Mágica (Evita o Zoom do Safari) */
