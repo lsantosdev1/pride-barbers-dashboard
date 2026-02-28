@@ -954,6 +954,7 @@ main {
 @media (max-width: 360px) {
   /* Faz os inputs de Data e Hora ficarem um embaixo do outro */
   .form-row {
+    width: 100% !important;
     flex-direction: column !important;
     gap: 5px; /* Adiciona um espacinho entre eles */
   }
@@ -1021,8 +1022,8 @@ main {
   /* 2. Corrige Inputs de Data e Hora "Colados" */
   /* No iOS, forçamos o empilhamento com margem manual */
   .form-row {
-    display: flex !important;
-    flex-direction: column !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
     gap: 0 !important;
   }
   .dark-input,
@@ -1030,15 +1031,15 @@ main {
   input[type="date"],
   input[type="time"],
   select {
-    height: 42px !important; /* Altura mais elegante para mobile */
-    padding: 8px 12px !important; /* Menos espaço interno para não parecer 'inchado' */
-    font-size: 16px !important; /* Mantém 16px para o iPhone NÃO dar zoom */
+    height: 30px !important; /* Altura mais elegante para mobile */
+    padding: 5px 10px !important; /* Menos espaço interno para não parecer 'inchado' */
+    font-size: 12px !important; /* Mantém 12px para o iPhone NÃO dar zoom */
     border-radius: 8px !important;
   }
 
   .form-row .form-group {
     width: 100% !important;
-    margin-bottom: 15px !important; /* Espaço real entre data e hora */
+    margin-bottom: 10px !important; /* Espaço real entre data e hora */
   }
 
   /* 3. Ajuste da Tela de Login */
