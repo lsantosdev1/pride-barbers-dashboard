@@ -1050,7 +1050,11 @@ main {
     max-width: 340px !important;
   }
   .login-container input {
-    padding: 10px 12px 10px 40px !important; /* Ajusta o padding para o ícone */
+    padding-left: 55px !important;
+  }
+
+  .input-icon {
+    left: 18px !important;
   }
   /* 4. Fonte Mágica (Evita o Zoom do Safari) */
   /* Se a fonte for < 16px, o iPhone dá zoom e quebra o layout lateral */
