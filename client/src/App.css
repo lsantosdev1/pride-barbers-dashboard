@@ -1025,6 +1025,16 @@ main {
     flex-direction: column !important;
     gap: 0 !important;
   }
+  .dark-input,
+  input[type="text"],
+  input[type="date"],
+  input[type="time"],
+  select {
+    height: 42px !important; /* Altura mais elegante para mobile */
+    padding: 8px 12px !important; /* Menos espaço interno para não parecer 'inchado' */
+    font-size: 16px !important; /* Mantém 16px para o iPhone NÃO dar zoom */
+    border-radius: 8px !important;
+  }
 
   .form-row .form-group {
     width: 100% !important;
