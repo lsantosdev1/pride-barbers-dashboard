@@ -561,7 +561,6 @@ main {
   background: transparent;
   border: 1px solid #444;
   color: #ff4444;
-  width: 32px;
   height: 32px;
   border-radius: 8px;
   display: flex;
@@ -1051,7 +1050,9 @@ main {
     max-width: 340px !important;
     padding: 1.5rem !important;
   }
-
+  .login-container input {
+    padding: 12px 12px 12px 45px;
+  }
   /* 4. Fonte Mágica (Evita o Zoom do Safari) */
   /* Se a fonte for < 16px, o iPhone dá zoom e quebra o layout lateral */
   input,
