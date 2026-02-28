@@ -1038,7 +1038,7 @@ main {
   }
 
   .form-row .form-group {
-    width: 100% !important;
+    width: 90% !important;
     margin-bottom: 10px !important; /* Espaço real entre data e hora */
     min-width: 0 !important; /* Evita que o iPhone tente expandir os campos */
   }
