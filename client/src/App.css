@@ -1024,7 +1024,7 @@ main {
   .form-row {
     display: grid !important;
     grid-template-columns: 1fr 1fr;
-    gap: 0 !important;
+    gap: 1 !important;
   }
   .dark-input,
   input[type="text"],
