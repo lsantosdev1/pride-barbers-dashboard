@@ -992,7 +992,6 @@ main {
     gap: 15px;
     width: 100%;
     flex-wrap: wrap; /* Permite quebrar linha se não couber */
-    padding-right: 50px; /* Espaço para o botão hambúrguer */
   }
 
   /* Faz o botão ocupar a largura toda ou se ajustar melhor */
@@ -1024,7 +1023,7 @@ main {
   .form-row {
     display: grid !important;
     grid-template-columns: 1fr 1fr;
-    gap: 1 !important;
+    gap: 0.5rem !important;
   }
   .dark-input,
   input[type="text"],
