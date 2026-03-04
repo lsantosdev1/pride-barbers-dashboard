@@ -1010,7 +1010,7 @@ main {
   /* ================================
      1. Reset Seguro para Inputs
      ================================ */
-  input,
+  input :not([type="checkbox"]):not([type="radio"]),
   select,
   textarea {
     -webkit-appearance: none;
@@ -1046,5 +1046,7 @@ main {
   .login-container form {
     width: 90%;
     max-width: 340px;
+    backdrop-filter: blur(2px); /* Desfoque do fundo */
+    -webkit-backdrop-filter: blur(10px); /* Safari support */
   }
 }
