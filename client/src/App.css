@@ -1049,4 +1049,10 @@ main {
     backdrop-filter: blur(2px); /* Desfoque do fundo */
     -webkit-backdrop-filter: blur(10px); /* Safari support */
   }
+  .checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--color-accent);
+    background: transparent;
+  }
 }
