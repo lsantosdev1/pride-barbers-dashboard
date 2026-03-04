@@ -1051,7 +1051,7 @@ main {
     backdrop-filter: blur(2px); /* Desfoque do fundo */
   }
   .login-container input {
-    padding: 12px 12px 12px 45px; /* Mantém o espaço para o ícone, mas reduz o padding para evitar 'inchamento' no iPhone */
+    padding: 14px 18px; /* Mantém o espaço para o ícone, mas reduz o padding para evitar 'inchamento' no iPhone */
     padding-left: 55px !important;
   }
 
