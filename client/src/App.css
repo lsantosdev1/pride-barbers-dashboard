@@ -1050,6 +1050,8 @@ main {
     -webkit-backdrop-filter: blur(10px); /* Safari support */
   }
   .checkbox-label input[type="checkbox"] {
+    -webkit-appearance: checkbox;
+    appearance: auto;
     width: 16px;
     height: 16px;
     accent-color: var(--color-accent);
