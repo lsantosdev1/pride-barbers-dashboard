@@ -1001,81 +1001,50 @@ main {
     padding: 12px 20px;
   }
 }
-/* ==========================================================================
+/* ==========================================================================  
    SOLUÇÃO EXCLUSIVA PARA IOS (IPHONE/IPAD)
-   Este bloco é invisível para o Android.
+   Apenas correção do LOGIN (não afeta agendamento)
    ========================================================================== */
 
 @supports (-webkit-touch-callout: none) {
-  /* 1. Mata o scroll lateral (O "samba" da tela) */
-  html,
-  body,
-  #root,
-  .dashboard-layout {
-    width: 100% !important;
-    max-width: 100% !important;
-
-    /* Evita que o iPhone tente 'adivinhar' a largura */
-    position: relative;
+  /* ================================
+     1. Reset Seguro para Inputs
+     ================================ */
+  input,
+  select,
+  textarea {
+    -webkit-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
   }
 
-  /* 2. Corrige Inputs de Data e Hora "Colados" */
-  /* No iOS, forçamos o empilhamento com margem manual */
-  .form-row {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem !important;
-  }
-  .dark-input,
-  input[type="text"],
-  input[type="date"],
-  input[type="time"],
-  select {
-    height: 30px !important; /* Altura mais elegante para mobile */
-    padding: 5px 10px !important; /* Menos espaço interno para não parecer 'inchado' */
-    font-size: 12px !important; /* Mantém 12px para o iPhone NÃO dar zoom */
-    border-radius: 8px !important;
-  }
-
-  .form-row .form-group {
-    width: 90% !important;
-    margin-bottom: 10px !important; /* Espaço real entre data e hora */
-    min-width: 0 !important; /* Evita que o iPhone tente expandir os campos */
-  }
-
-  /* 3. Ajuste da Tela de Login */
-  /* Impede que o formulário de login estique no iPhone */
-  .login-container form {
-    width: 90% !important;
-    max-width: 340px !important;
-    backdrop-filter: blur(2px); /* Desfoque do fundo */
-  }
+  /* ================================
+     2. LOGIN - Correção definitiva
+     ================================ */
   .login-container input {
-    padding: 14px 18px; /* Mantém o espaço para o ícone, mas reduz o padding para evitar 'inchamento' no iPhone */
-    padding-left: 55px !important;
+    width: 100%;
+    min-height: 48px; /* Altura ideal mobile */
+    padding: 14px 18px;
+    padding-left: 55px; /* Espaço para ícone */
+    font-size: 16px; /* Evita zoom do Safari */
+    border-radius: 8px;
+  }
+
+  /* Garante que text e password fiquem idênticos */
+  .login-container input[type="text"],
+  .login-container input[type="password"] {
+    min-height: 48px;
   }
 
   .input-icon {
-    left: 18px !important;
-  }
-  /* 4. Fonte Mágica (Evita o Zoom do Safari) */
-  /* Se a fonte for < 16px, o iPhone dá zoom e quebra o layout lateral */
-  input,
-  select,
-  textarea,
-  .dark-input {
-    font-size: 16px !important;
+    left: 18px;
   }
 
-  /* 5. Ajuste de Page Header (Título + Botão Novo) */
-  .page-header {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-  }
-
-  /* 6. Distância e Respiro (Efeito 'Afastar' a tela) */
-  main {
-    padding: 1.2rem !important;
+  /* ================================
+     3. Ajuste do Formulário Login
+     ================================ */
+  .login-container form {
+    width: 90%;
+    max-width: 340px;
   }
 }
