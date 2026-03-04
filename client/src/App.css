@@ -231,8 +231,8 @@ main {
 
 /* Container de Página (Limita a largura) */
 .page-content {
-  min-height: 100vh;
-  padding: 1rem;
+  min-height: auto;
+  padding: 4rem 1rem;
   display: flex;
   flex-direction: column;
   padding-bottom: 2rem;
@@ -1051,6 +1051,7 @@ main {
     backdrop-filter: blur(2px); /* Desfoque do fundo */
   }
   .login-container input {
+    padding: 12px 12px 12px 45px;
     padding-left: 55px !important;
   }
 
