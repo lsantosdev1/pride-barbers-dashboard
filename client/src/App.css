@@ -1056,7 +1056,15 @@ main {
     padding: 14px 18px; /* Mantém o espaço para o ícone, mas reduz o padding para evitar 'inchamento' no iPhone */
     padding-left: 55px !important;
   }
-
+  .form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    font-size: 0.9rem;
+    color: #fff;
+    margin-bottom: 0.5rem;
+  }
   .input-icon {
     left: 18px !important;
   }
