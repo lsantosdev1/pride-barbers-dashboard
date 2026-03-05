@@ -1047,6 +1047,7 @@ main {
   /* Impede que o formulário de login estique no iPhone */
   .login-container form {
     display: flex !important;
+    flex-direction: column !important;
     align-items: center !important;
     max-width: 340px !important;
     backdrop-filter: blur(2px); /* Desfoque do fundo */
