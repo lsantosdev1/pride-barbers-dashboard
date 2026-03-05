@@ -1049,12 +1049,11 @@ main {
     max-width: 340px !important;
     backdrop-filter: blur(2px); /* Desfoque do fundo */
   }
-  .login-container input {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
+  .login-container input[type="text"],
+  .login-container input[type="password"],
+  .login-container input[type="email"] {
     min-height: 48px;
-    padding: 14px 18px; /* Mantém o espaço para o ícone, mas reduz o padding para evitar 'inchamento' no iPhone */
+    padding: 14px 18px;
     padding-left: 55px !important;
   }
 
