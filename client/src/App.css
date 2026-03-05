@@ -1051,8 +1051,8 @@ main {
     backdrop-filter: blur(2px); /* Desfoque do fundo */
   }
   .login-container input {
-    display: flex;
-    align-items: center;
+    display: flex !important;
+    align-items: center !important;
     width: 100% !important;
     min-height: 48px;
     padding: 14px 18px; /* Mantém o espaço para o ícone, mas reduz o padding para evitar 'inchamento' no iPhone */
