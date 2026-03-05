@@ -1046,14 +1046,13 @@ main {
   /* 3. Ajuste da Tela de Login */
   /* Impede que o formulário de login estique no iPhone */
   .login-container form {
+    display: flex !important;
+    align-items: center !important;
     width: 90% !important;
     max-width: 340px !important;
     backdrop-filter: blur(2px); /* Desfoque do fundo */
   }
   .login-container input {
-    display: flex !important;
-    align-items: center !important;
-    width: 100% !important;
     min-height: 48px;
     padding: 14px 18px; /* Mantém o espaço para o ícone, mas reduz o padding para evitar 'inchamento' no iPhone */
     padding-left: 55px !important;
