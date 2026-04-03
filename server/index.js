@@ -1,6 +1,6 @@
 /* ==========================================================================
-   PROJETO: PRIDE BARBERS - BACKEND API
-   DESCRIÇÃO: API REST com MongoDB Atlas e Autenticação JWT
+   PROJETO: PRIDE BARBERS - BACKEND API (v2.0 Multi-User COMPLETO)
+   DESCRIÇÃO: API REST com MongoDB Atlas, JWT e Isolamento de Dados
    ========================================================================== */
 
 const express = require("express");
@@ -21,17 +21,24 @@ const DATABASE_URL =
 /* --- CONEXÃO MONGODB --- */
 mongoose
   .connect(DATABASE_URL)
-  .then(() => console.log("✅ Conectado com sucesso ao MongoDB Atlas!"))
+  .then(() => console.log("✅ Conectado ao MongoDB Atlas!"))
   .catch((err) => console.error("❌ Erro ao conectar ao MongoDB:", err));
 
-/* --- MIDDLEWARES GERAIS --- */
 app.use(express.json());
 app.use(cors());
 
 /* --- MODELOS DE DADOS (SCHEMAS) --- */
 
+const userSchema = new mongoose.Schema({
+  nome: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+});
+const User = mongoose.model("User", userSchema);
+
 const configuracaoSchema = new mongoose.Schema({
-  horarios: { abertura: String, fechamento: String },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  horarios: { abertura: String, fechamento: String, mesAberto: String },
   dadosBarbearia: {
     nome: String,
     endereco: String,
@@ -43,6 +50,7 @@ const configuracaoSchema = new mongoose.Schema({
 const Configuracao = mongoose.model("Configuracao", configuracaoSchema);
 
 const agendamentoSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   nome: String,
   servico: String,
   status: { type: String, default: "Agendado" },
@@ -54,12 +62,13 @@ const agendamentoSchema = new mongoose.Schema({
 const Agendamento = mongoose.model("Agendamento", agendamentoSchema);
 
 const servicoSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   nome: String,
   preco: String,
 });
 const Servico = mongoose.model("Servico", servicoSchema);
 
-/* --- MIDDLEWARE DE AUTENTICAÇÃO (Mover para cá para organização) --- */
+/* --- MIDDLEWARE DE AUTENTICAÇÃO --- */
 function autenticarToken(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader)
@@ -69,104 +78,278 @@ function autenticarToken(req, res, next) {
   jwt.verify(token, SECRET_KEY, (err, decoded) => {
     if (err)
       return res.status(401).json({ message: "Token inválido ou expirado" });
-    req.user = decoded;
+    req.user = decoded; // req.user.id contém o ID do barbeiro
     next();
   });
 }
+app.post("/public/recuperar-senha", async (req, res) => {
+  try {
+    const { email } = req.body;
+    console.log(`Solicitação de recuperação para: ${email}`);
 
-/* --- ROTAS PÚBLICAS (Login e Clientes) --- */
+    // Aqui no futuro você buscará o usuário e enviará o e-mail real.
+    // Por enquanto, apenas confirmamos para o frontend:
+    res.json({ message: "Instruções enviadas." });
+  } catch (error) {
+    res.status(500).send("Erro");
+  }
+});
+
+/* --- ROTAS DE AUTENTICAÇÃO --- */
+
+app.post("/register", async (req, res) => {
+  try {
+    const { nome, email, password } = req.body;
+    const jaExiste = await User.findOne({ email });
+    if (jaExiste)
+      return res.status(400).json({ message: "E-mail já cadastrado" });
+
+    await User.create({ nome, email, password });
+    res.status(201).json({ message: "Barbeiro cadastrado com sucesso!" });
+  } catch (error) {
+    res.status(500).json({ message: "Erro ao cadastrar" });
+  }
+});
 
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  if (email === "admin" && password === "admin") {
-    const token = jwt.sign({ role: "admin" }, SECRET_KEY, { expiresIn: "1h" });
-    const config = (await Configuracao.findOne()) || {
-      perfil: { nome: "Mestre Barbeiro", email: "admin@admin.com" },
-    };
+  const user = await User.findOne({ email, password });
+
+  if (user) {
+    const token = jwt.sign({ id: user._id, nome: user.nome }, SECRET_KEY, {
+      expiresIn: "24h",
+    });
     return res.json({
       auth: true,
       token,
-      user: { nome: config.perfil.nome, email: config.perfil.email },
+      user: { id: user._id, nome: user.nome, email: user.email },
     });
   }
   res.status(401).json({ auth: false, message: "Credenciais inválidas" });
 });
 
-app.get("/public/servicos", async (req, res) => {
-  try {
-    // 1. Tenta buscar os serviços no banco
-    let lista = await Servico.find();
+/* --- ROTAS PÚBLICAS (Clientes) --- */
 
-    // 2. Se não encontrar nenhum (lista vazia), cria os serviços padrão
+app.get("/public/servicos/:barbeiroId", async (req, res) => {
+  try {
+    const { barbeiroId } = req.params;
+    let lista = await Servico.find({ userId: barbeiroId });
+
+    // Lógica da v1: Criar padrões se estiver vazio para este barbeiro específico
     if (lista.length === 0) {
-      console.log("⚠️ Banco vazio! Criando serviços padrão...");
       const servicosPadrao = [
-        { nome: "Corte Masculino", preco: "35,00" },
-        { nome: "Barba", preco: "25,00" },
-        { nome: "Corte + Barba", preco: "55,00" },
+        { nome: "Corte Masculino", preco: "35,00", userId: barbeiroId },
+        { nome: "Barba", preco: "25,00", userId: barbeiroId },
+        { nome: "Corte + Barba", preco: "55,00", userId: barbeiroId },
       ];
       await Servico.insertMany(servicosPadrao);
-      // Busca novamente para garantir que agora temos os dados com os IDs do MongoDB
-      lista = await Servico.find();
+      lista = await Servico.find({ userId: barbeiroId });
     }
-
-    // 3. SÓ AGORA enviamos a resposta para o Frontend
     res.json(lista);
   } catch (error) {
-    console.error("❌ Erro ao carregar serviços:", error);
     res.status(500).json({ message: "Erro ao carregar serviços" });
   }
 });
+
 app.post("/public/agendamentos", async (req, res) => {
   try {
-    const novo = new Agendamento({
-      ...req.body,
-      status: "Agendado",
-      avatar: `https://ui-avatars.com/api/?name=${(req.body.nome || "Cliente").replace(" ", "+")}&background=random`,
+    // 1. Pegamos os dados e limpamos espaços em branco (trim)
+    const barbeiroId = req.body.barbeiroId;
+    const data = req.body.data?.trim();
+    const horario = req.body.horario?.trim();
+    const { nome, servico, preco } = req.body;
+
+    // --- LOG PARA DEBUG ---
+    console.log(
+      `🔎 Tentativa: Barbeiro: ${barbeiroId} | Data: ${data} | Hora: ${horario}`,
+    );
+
+    // 2. BUSCAR CONFIGURAÇÃO DO BARBEIRO (Para horários e Mês Aberto)
+    const configBarbeiro = await Configuracao.findOne({ userId: barbeiroId });
+
+    if (!configBarbeiro) {
+      return res
+        .status(404)
+        .json({ message: "Barbeiro não encontrado ou sem configurações." });
+    }
+
+    // 3. TRAVA DE PASSADO: Não permite agendar ontem ou hoje em hora que já passou
+    const agora = new Date();
+    const dataAgendamento = new Date(`${data}T${horario}`);
+
+    if (dataAgendamento < agora) {
+      return res.status(400).json({
+        message: "Ops! Você não pode agendar em um horário que já passou.",
+      });
+    }
+
+    // 4. TRAVA DE MÊS CONTROLADO: Verifica se o barbeiro liberou este mês específico
+    const dataEscolhida = new Date(`${data}T00:00:00`);
+    const mesEscolhido = dataEscolhida.getMonth() + 1; // Janeiro é 0, somamos 1 para ficar 1-12
+    const anoEscolhido = dataEscolhida.getFullYear();
+    const anoAtual = agora.getFullYear();
+
+    const mesAbertoPeloBarbeiro = configBarbeiro.horarios?.mesAberto; // Deve ser salvo como "4", "5", etc.
+
+    if (
+      mesAbertoPeloBarbeiro &&
+      (mesEscolhido.toString() !== mesAbertoPeloBarbeiro.toString() ||
+        anoEscolhido !== anoAtual)
+    ) {
+      const mesesNomes = [
+        "",
+        "Janeiro",
+        "Fevereiro",
+        "Março",
+        "Abril",
+        "Maio",
+        "Junho",
+        "Julho",
+        "Agosto",
+        "Setembro",
+        "Outubro",
+        "Novembro",
+        "Dezembro",
+      ];
+      const nomeMesAberto = mesesNomes[parseInt(mesAbertoPeloBarbeiro)];
+
+      return res.status(400).json({
+        message: `Este barbeiro está aceitando agendamentos apenas para o mês de ${nomeMesAberto}!`,
+      });
+    }
+
+    // 5. VERIFICAR CONFLITO DE HORÁRIO
+    const conflito = await Agendamento.findOne({
+      userId: barbeiroId,
+      data: data,
+      horario: horario,
+      status: { $ne: "Cancelado" },
     });
+
+    if (conflito) {
+      console.log("⚠️ CONFLITO DETECTADO! Gerando sugestões...");
+
+      // Horários de atendimento vindos da config ou padrão (9h às 19h)
+      let inicio = 9,
+        fim = 19;
+      if (configBarbeiro.horarios) {
+        inicio = parseInt(configBarbeiro.horarios.abertura.split(":")[0]);
+        fim = parseInt(configBarbeiro.horarios.fechamento.split(":")[0]);
+      }
+
+      // Busca o que já está ocupado no dia para sugerir o que sobrou
+      const agendamentosDoDia = await Agendamento.find({
+        userId: barbeiroId,
+        data: data,
+        status: { $ne: "Cancelado" },
+      });
+
+      const horasOcupadas = agendamentosDoDia.map((a) => a.horario);
+      const sugestoes = [];
+
+      for (let h = inicio; h <= fim; h++) {
+        const horaFormatada = h < 10 ? `0${h}:00` : `${h}:00`;
+        if (!horasOcupadas.includes(horaFormatada)) {
+          sugestoes.push(horaFormatada);
+        }
+      }
+
+      return res.status(400).json({
+        message: "Este horário já está reservado!",
+        sugestoes: sugestoes,
+      });
+    }
+
+    // 6. TUDO OK! SALVAR AGENDAMENTO
+    console.log("✅ Horário livre e mês permitido. Salvando...");
+    const novo = new Agendamento({
+      nome,
+      servico,
+      preco,
+      data,
+      horario,
+      userId: barbeiroId,
+      status: "Agendado",
+      avatar: `https://ui-avatars.com/api/?name=${(nome || "Cliente").replace(" ", "+")}&background=random`,
+    });
+
     await novo.save();
     res.status(201).json(novo);
   } catch (error) {
-    res.status(500).json({ message: "Erro ao realizar agendamento" });
+    console.error("❌ Erro no agendamento:", error);
+    res.status(500).json({ message: "Erro interno ao realizar agendamento" });
+  }
+});
+// 1. NOVA ROTA: Lista todos os tipos de serviços que a barbearia oferece (sem repetir)
+app.get("/public/servicos-gerais", async (req, res) => {
+  try {
+    // O 'distinct' pega nomes únicos. Ex: Se 3 barbeiros fazem "Corte", só aparece "Corte" uma vez na lista.
+    const servicos = await Servico.distinct("nome");
+    res.json(servicos);
+  } catch (error) {
+    res.status(500).json({ message: "Erro ao buscar tipos de serviços" });
   }
 });
 
-/* --- ROTAS PROTEGIDAS (Admin) --- */
+// 2. NOVA ROTA: Quando o cliente clica em "Corte", essa rota busca quais barbeiros fazem esse serviço
+app.get("/public/barbeiros-por-servico", async (req, res) => {
+  try {
+    const { nomeServico } = req.query; // Pega o nome do serviço da URL
 
+    // Busca na tabela de serviços quem faz esse 'nomeServico'
+    // O .populate('userId') traz o nome e e-mail do barbeiro junto
+    const profissionais = await Servico.find({ nome: nomeServico }).populate(
+      "userId",
+      "nome email",
+    );
+
+    // Organiza os dados para o frontend
+    const resultado = profissionais.map((item) => ({
+      barbeiroId: item.userId._id,
+      barbeiroNome: item.userId.nome,
+      preco: item.preco,
+    }));
+
+    res.json(resultado);
+  } catch (error) {
+    res.status(500).json({ message: "Erro ao buscar profissionais" });
+  }
+});
+
+/* --- ROTAS PROTEGIDAS (Admin / Barbeiro) --- */
+
+// CONFIGURAÇÕES
 app.get("/config", autenticarToken, async (req, res) => {
-  let config = await Configuracao.findOne();
+  let config = await Configuracao.findOne({ userId: req.user.id });
   if (!config) {
     config = await Configuracao.create({
+      userId: req.user.id,
       horarios: { abertura: "09:00", fechamento: "20:00" },
-      dadosBarbearia: {
-        nome: "Pride Barbers",
-        endereco: "Rua das Navais, 123",
-        telefone: "(11) 99999-0000",
-        email: "contato@pridebarbers.com",
-      },
-      perfil: { nome: "Mestre Barbeiro", email: "admin@admin.com" },
+      perfil: { nome: req.user.nome, email: "" },
     });
   }
   res.json(config);
 });
 
 app.put("/config", autenticarToken, async (req, res) => {
-  const config = await Configuracao.findOneAndUpdate({}, req.body, {
-    new: true,
-    upsert: true,
-  });
+  const config = await Configuracao.findOneAndUpdate(
+    { userId: req.user.id },
+    req.body,
+    { upsert: true, returnDocument: "after" },
+  );
   res.json({ message: "Configurações atualizadas", configuracoes: config });
 });
 
-// CRUD AGENDAMENTOS
+// CRUD AGENDAMENTOS (Isolado por userId)
 app.get("/agendamentos", autenticarToken, async (req, res) => {
-  const lista = await Agendamento.find();
+  const lista = await Agendamento.find({ userId: req.user.id });
   res.json(lista);
 });
 
 app.post("/agendamentos", autenticarToken, async (req, res) => {
   const novo = new Agendamento({
     ...req.body,
+    userId: req.user.id,
     avatar: `https://ui-avatars.com/api/?name=${(req.body.nome || "Admin").replace(" ", "+")}&background=random`,
   });
   await novo.save();
@@ -174,10 +357,10 @@ app.post("/agendamentos", autenticarToken, async (req, res) => {
 });
 
 app.put("/agendamentos/:id", autenticarToken, async (req, res) => {
-  const atualizado = await Agendamento.findByIdAndUpdate(
-    req.params.id,
+  const atualizado = await Agendamento.findOneAndUpdate(
+    { _id: req.params.id, userId: req.user.id }, // Só edita se for o dono
     req.body,
-    { new: true },
+    { returnDocument: "after" },
   );
   if (!atualizado)
     return res.status(404).json({ message: "Agendamento não encontrado" });
@@ -185,34 +368,45 @@ app.put("/agendamentos/:id", autenticarToken, async (req, res) => {
 });
 
 app.delete("/agendamentos/:id", autenticarToken, async (req, res) => {
-  const deletado = await Agendamento.findByIdAndDelete(req.params.id);
+  const deletado = await Agendamento.findOneAndDelete({
+    _id: req.params.id,
+    userId: req.user.id,
+  });
   if (!deletado)
     return res.status(404).json({ message: "Agendamento não encontrado" });
   res.json({ message: "Agendamento removido com sucesso" });
 });
 
-// CRUD SERVIÇOS
+// CRUD SERVIÇOS (Isolado por userId)
 app.get("/servicos", autenticarToken, async (req, res) => {
-  const lista = await Servico.find();
+  const lista = await Servico.find({ userId: req.user.id });
   res.json(lista);
 });
 
 app.post("/servicos", autenticarToken, async (req, res) => {
-  const novoServico = await Servico.create(req.body);
+  const novoServico = await Servico.create({
+    ...req.body,
+    userId: req.user.id,
+  });
   res.status(201).json(novoServico);
 });
 
 app.put("/servicos/:id", autenticarToken, async (req, res) => {
-  const atualizado = await Servico.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-  });
+  const atualizado = await Servico.findOneAndUpdate(
+    { _id: req.params.id, userId: req.user.id },
+    req.body,
+    { returnDocument: "after" },
+  );
   if (!atualizado)
     return res.status(404).json({ message: "Serviço não encontrado" });
   res.json(atualizado);
 });
 
 app.delete("/servicos/:id", autenticarToken, async (req, res) => {
-  const deletado = await Servico.findByIdAndDelete(req.params.id);
+  const deletado = await Servico.findOneAndDelete({
+    _id: req.params.id,
+    userId: req.user.id,
+  });
   if (!deletado)
     return res.status(404).json({ message: "Serviço não encontrado" });
   res.json({ message: "Serviço removido com sucesso" });
@@ -220,5 +414,5 @@ app.delete("/servicos/:id", autenticarToken, async (req, res) => {
 
 /* --- INICIALIZAÇÃO --- */
 app.listen(PORT, () =>
-  console.log(`🔥 Backend Pride Barbers rodando na porta ${PORT}`),
+  console.log(`🔥 Pride Barbers v2.0 rodando na porta ${PORT}`),
 );
