@@ -10,64 +10,93 @@ import {
 } from "lucide-react";
 
 function Agendar() {
-  // --- ESTADOS ---
-  const [listaServicos, setListaServicos] = useState([]);
+  const [nomesServicos, setNomesServicos] = useState([]);
+  const [barbeirosDisponiveis, setBarbeirosDisponiveis] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sucesso, setSucesso] = useState(false);
 
   const [dadosAgendamento, setDadosAgendamento] = useState({
     nome: "",
     servico: "",
+    barbeiroId: "",
+    barbeiroNome: "",
     data: "",
     horario: "",
     preco: "",
   });
 
-  // --- CARREGAR SERVIÇOS DISPONÍVEIS ---
+  // 1. Busca os serviços disponíveis
   useEffect(() => {
-    const buscarServicos = async () => {
+    const carregar = async () => {
       try {
-        // Nota: Certifique-se de que criou a rota /public/servicos no backend
-        const response = await api.get("/public/servicos");
-        setListaServicos(response.data);
-
-        // Define o primeiro serviço como padrão
-        if (response.data.length > 0) {
-          setDadosAgendamento((prev) => ({
-            ...prev,
-            servico: response.data[0].nome,
-            preco: `R$ ${response.data[0].preco}`,
-          }));
-        }
-      } catch (error) {
-        console.error("Erro ao carregar serviços:", error);
+        const res = await api.get("/public/servicos-gerais");
+        setNomesServicos(res.data || []);
+      } catch (err) {
+        console.error("Erro ao carregar serviços");
       }
     };
-    buscarServicos();
+    carregar();
   }, []);
 
-  // --- LÓGICA DE SELEÇÃO DE SERVIÇO ---
-  const handleMudarServico = (e) => {
-    const nomeServico = e.target.value;
-    const servico = listaServicos.find((s) => s.nome === nomeServico);
+  // 2. Quando muda o serviço, busca barbeiros
+  const handleMudarServico = async (e) => {
+    const nomeS = e.target.value;
     setDadosAgendamento({
       ...dadosAgendamento,
-      servico: nomeServico,
-      preco: servico ? `R$ ${servico.preco}` : "",
+      servico: nomeS,
+      barbeiroId: "",
+      preco: "",
     });
+
+    if (nomeS) {
+      try {
+        const res = await api.get(
+          `/public/barbeiros-por-servico?nomeServico=${nomeS}`,
+        );
+        setBarbeirosDisponiveis(res.data || []);
+      } catch (err) {
+        setBarbeirosDisponiveis([]);
+      }
+    }
   };
 
-  // --- ENVIAR AGENDAMENTO ---
+  // 3. Quando muda o barbeiro, define o preço
+  const handleMudarBarbeiro = (e) => {
+    const id = e.target.value;
+    const b = barbeirosDisponiveis.find((x) => x.barbeiroId === id);
+    if (b) {
+      setDadosAgendamento({
+        ...dadosAgendamento,
+        barbeiroId: id,
+        barbeiroNome: b.barbeiroNome,
+        preco: `R$ ${b.preco}`,
+      });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
-      // Envia para a rota pública que criamos no Passo 1
       await api.post("/public/agendamentos", dadosAgendamento);
       setSucesso(true);
     } catch (error) {
-      alert("Desculpe, ocorreu um erro ao agendar. Tente novamente.");
+      // Verifica se o servidor enviou uma resposta com erro
+      if (error.response && error.response.data) {
+        const { message, sugestoes } = error.response.data;
+
+        // Se houver sugestões de horários (conflito de agenda)
+        if (sugestoes && sugestoes.length > 0) {
+          const livres = sugestoes.join(", ");
+          alert(`${message} Sugestões para este dia: ${livres}`);
+        } else {
+          // Se for erro de mês bloqueado ou data passada, mostra a mensagem real do servidor
+          alert(message);
+        }
+      } else {
+        // Caso seja um erro de conexão ou algo desconhecido
+        alert("Erro ao processar agendamento. Tente novamente mais tarde.");
+      }
     } finally {
       setLoading(false);
     }
@@ -85,15 +114,13 @@ function Agendar() {
           style={{ marginBottom: "1rem" }}
         />
         <h1>Agendamento Confirmado!</h1>
-        <p className="subtitle">
-          Obrigado, {dadosAgendamento.nome}. Esperamos você em breve!
-        </p>
+        <p className="subtitle">Obrigado, {dadosAgendamento.nome}!</p>
         <button
           className="btn-primary"
           onClick={() => window.location.reload()}
           style={{ marginTop: "2rem" }}
         >
-          Fazer novo agendamento
+          Voltar
         </button>
       </div>
     );
@@ -113,11 +140,7 @@ function Agendar() {
 
       <div
         className="modal-content"
-        style={{
-          maxWidth: "500px",
-          margin: "0 auto",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
-        }}
+        style={{ maxWidth: "500px", margin: "0 auto" }}
       >
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -128,14 +151,13 @@ function Agendar() {
               type="text"
               className="dark-input"
               placeholder="Digite seu nome completo"
-              value={dadosAgendamento.nome}
+              required
               onChange={(e) =>
                 setDadosAgendamento({
                   ...dadosAgendamento,
                   nome: e.target.value,
                 })
               }
-              required
             />
           </div>
 
@@ -147,14 +169,13 @@ function Agendar() {
               <input
                 type="date"
                 className="dark-input"
-                value={dadosAgendamento.data}
+                required
                 onChange={(e) =>
                   setDadosAgendamento({
                     ...dadosAgendamento,
                     data: e.target.value,
                   })
                 }
-                required
               />
             </div>
             <div className="form-group">
@@ -164,14 +185,13 @@ function Agendar() {
               <input
                 type="time"
                 className="dark-input"
-                value={dadosAgendamento.horario}
+                required
                 onChange={(e) =>
                   setDadosAgendamento({
                     ...dadosAgendamento,
                     horario: e.target.value,
                   })
                 }
-                required
               />
             </div>
           </div>
@@ -184,10 +204,32 @@ function Agendar() {
               className="dark-input"
               value={dadosAgendamento.servico}
               onChange={handleMudarServico}
+              required
             >
-              {listaServicos.map((s) => (
-                <option key={s._id} value={s.nome}>
-                  {s.nome} - R$ {s.preco}
+              <option value="">Selecione o serviço...</option>
+              {nomesServicos.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>
+              <User size={14} /> Escolha o Barbeiro
+            </label>
+            <select
+              className="dark-input"
+              value={dadosAgendamento.barbeiroId}
+              onChange={handleMudarBarbeiro}
+              required
+              disabled={!dadosAgendamento.servico}
+            >
+              <option value="">Selecione o barbeiro...</option>
+              {barbeirosDisponiveis.map((b) => (
+                <option key={b.barbeiroId} value={b.barbeiroId}>
+                  {b.barbeiroNome}
                 </option>
               ))}
             </select>
@@ -205,18 +247,15 @@ function Agendar() {
             <span style={{ color: "#888", fontSize: "0.9rem" }}>
               Valor Estimado:
             </span>
-            <h2
-              className="preco-destaque"
-              style={{ color: "#41f1b6", margin: "5px 0" }}
-            >
-              {dadosAgendamento.preco}
+            <h2 style={{ color: "#41f1b6", margin: "5px 0" }}>
+              {dadosAgendamento.preco || "R$ 0,00"}
             </h2>
           </div>
 
           <button
             type="submit"
             className="btn-primary"
-            disabled={loading}
+            disabled={loading || !dadosAgendamento.barbeiroId}
             style={{ width: "100%", justifyContent: "center" }}
           >
             {loading ? (
@@ -229,17 +268,9 @@ function Agendar() {
           </button>
         </form>
       </div>
-      {/* Espaçador para empurrar o footer para baixo e m telas grandes */}
-      <div style={{ flex: 0.5 }}></div>
-
+      {/* --- RODAPÉ ADMINISTRATIVO RESTAURADO --- */}
       <footer
-        style={{
-          marginTop: "1rem",
-          textAlign: "center",
-          padding: "1rem",
-          width: "100%",
-          zIndex: 10,
-        }}
+        style={{ marginTop: "2rem", textAlign: "center", padding: "1rem" }}
       >
         <p style={{ fontSize: "0.8rem", color: "#666" }}>
           © 2026 Pride Barbers |
@@ -249,6 +280,7 @@ function Agendar() {
               color: "#41f1b6",
               marginLeft: "5px",
               textDecoration: "none",
+              fontWeight: "500",
             }}
           >
             Acesso Administrativo

@@ -21,15 +21,11 @@ function Configuracoes() {
   /* ===============================
       CONTROLE DE ABAS
   =============================== */
-
-  // Define qual aba está ativa no menu lateral
   const [activeTab, setActiveTab] = useState("horarios");
 
   /* ===============================
       ESTADOS DE CONFIGURAÇÃO
   =============================== */
-
-  // Dados gerais da barbearia
   const [dadosBarbearia, setDadosBarbearia] = useState({
     nome: "",
     endereco: "",
@@ -37,33 +33,29 @@ function Configuracoes() {
     email: "",
   });
 
-  // Horários de funcionamento
   const [horarios, setHorarios] = useState({
     abertura: "09:00",
     fechamento: "20:00",
+    mesAberto: "4", // Ex: 4 para Abril, 5 para Maio...
   });
 
-  // Dados do perfil do administrador
   const [perfil, setPerfil] = useState({
     nome: "Mestre Barbeiro",
     email: "admin@admin.com",
   });
 
-  // Preferências de notificações
   const [notificacoes, setNotificacoes] = useState({
     emailAgendamento: true,
     lembreteDiario: true,
     sons: false,
   });
 
-  // Lista de serviços cadastrados
   const [servicos, setServicos] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   /* ===============================
       CARREGAMENTO INICIAL
   =============================== */
-
-  // Executa ao carregar a página
   useEffect(() => {
     carregarConfiguracoes();
     carregarServicos();
@@ -72,21 +64,18 @@ function Configuracoes() {
   /* ===============================
       BUSCA DE DADOS
   =============================== */
-
-  // Busca configurações gerais (horários, dados e perfil)
   const carregarConfiguracoes = async () => {
     try {
       const res = await api.get("/config");
-
       if (res.data.horarios) setHorarios(res.data.horarios);
       if (res.data.dadosBarbearia) setDadosBarbearia(res.data.dadosBarbearia);
       if (res.data.perfil) setPerfil(res.data.perfil);
+      if (res.data.notificacoes) setNotificacoes(res.data.notificacoes);
     } catch (error) {
       console.error("Erro ao carregar configurações:", error);
     }
   };
 
-  // Busca serviços cadastrados
   const carregarServicos = async () => {
     try {
       const res = await api.get("/servicos");
@@ -99,18 +88,17 @@ function Configuracoes() {
   /* ===============================
       SALVAR CONFIGURAÇÕES
   =============================== */
-
-  // Salva todas as configurações em uma única requisição
   const handleSalvarGeral = async () => {
     try {
       const payload = {
         horarios,
         dadosBarbearia,
         perfil,
+        notificacoes,
       };
 
       await api.put("/config", payload);
-      alert("Configurações salvas com sucesso!");
+      alert("Configurações da Pride Barbers salvas com sucesso!");
     } catch (error) {
       console.error("Erro ao salvar configurações:", error);
       alert("Erro ao salvar configurações.");
@@ -120,8 +108,6 @@ function Configuracoes() {
   /* ===============================
       CRUD DE SERVIÇOS
   =============================== */
-
-  // Adiciona um novo serviço
   const addServico = async () => {
     try {
       const novoServico = { nome: "Novo Serviço", preco: "0,00" };
@@ -132,9 +118,8 @@ function Configuracoes() {
     }
   };
 
-  // Remove um serviço
   const deleteServico = async (id) => {
-    if (window.confirm("Remover este serviço?")) {
+    if (window.confirm("Remover este serviço do seu catálogo?")) {
       try {
         await api.delete(`/servicos/${id}`);
         setServicos(servicos.filter((s) => s._id !== id));
@@ -144,19 +129,17 @@ function Configuracoes() {
     }
   };
 
-  // Atualiza estado local ao editar campos
   const handleEditChange = (id, campo, valor) => {
     setServicos(
       servicos.map((s) => (s._id === id ? { ...s, [campo]: valor } : s)),
     );
   };
 
-  // Salva edição do serviço ao perder foco
   const salvarEdicaoServico = async (servico) => {
-    if (!servico.nome || servico.nome === "Novo Serviço") return; // Evita salvar nomes genéricos
+    if (!servico.nome || servico.nome === "Novo Serviço") return;
     try {
       await api.put(`/servicos/${servico._id}`, servico);
-      console.log("Serviço atualizado!");
+      console.log("Serviço atualizado com sucesso!");
     } catch (error) {
       console.error("Erro ao salvar edição");
     }
@@ -165,10 +148,8 @@ function Configuracoes() {
   /* ===============================
       RENDERIZAÇÃO DINÂMICA
   =============================== */
-
   const renderContent = () => {
     switch (activeTab) {
-      /* -------- HORÁRIOS -------- */
       case "horarios":
         return (
           <div className="fade-in">
@@ -176,7 +157,6 @@ function Configuracoes() {
             <p className="subtitle">
               Defina o período de atendimento da barbearia.
             </p>
-
             <div className="form-row">
               <div className="input-Wrapper">
                 <label>Abertura</label>
@@ -185,14 +165,10 @@ function Configuracoes() {
                   className="dark-input"
                   value={horarios.abertura}
                   onChange={(e) =>
-                    setHorarios({
-                      ...horarios,
-                      abertura: e.target.value,
-                    })
+                    setHorarios({ ...horarios, abertura: e.target.value })
                   }
                 />
               </div>
-
               <div className="input-Wrapper">
                 <label>Fechamento</label>
                 <input
@@ -200,23 +176,51 @@ function Configuracoes() {
                   className="dark-input"
                   value={horarios.fechamento}
                   onChange={(e) =>
-                    setHorarios({
-                      ...horarios,
-                      fechamento: e.target.value,
-                    })
+                    setHorarios({ ...horarios, fechamento: e.target.value })
                   }
                 />
               </div>
             </div>
+
+            {/* SELETOR DE MÊS INTEGRADO AO RETURN */}
+            <div className="form-group-settings" style={{ marginTop: "2rem" }}>
+              <label>Liberar Agenda para o Mês:</label>
+              <select
+                className="dark-input"
+                value={horarios.mesAberto}
+                onChange={(e) =>
+                  setHorarios({ ...horarios, mesAberto: e.target.value })
+                }
+                style={{ width: "100%", marginTop: "8px" }}
+              >
+                <option value="1">Janeiro</option>
+                <option value="2">Fevereiro</option>
+                <option value="3">Março</option>
+                <option value="4">Abril</option>
+                <option value="5">Maio</option>
+                <option value="6">Junho</option>
+                <option value="7">Julho</option>
+                <option value="8">Agosto</option>
+                <option value="9">Setembro</option>
+                <option value="10">Outubro</option>
+                <option value="11">Novembro</option>
+                <option value="12">Dezembro</option>
+              </select>
+              <p
+                className="subtitle"
+                style={{ fontSize: "12px", marginTop: "8px" }}
+              >
+                * Os clientes só conseguirão agendar horários dentro do mês
+                selecionado.
+              </p>
+            </div>
           </div>
         );
 
-      /* -------- DADOS -------- */
       case "dados":
         return (
           <div className="fade-in">
             <h3>Dados da Barbearia</h3>
-
             <div className="form-group-settings">
               <label>Nome do Estabelecimento</label>
               <input
@@ -224,14 +228,10 @@ function Configuracoes() {
                 className="dark-input"
                 value={dadosBarbearia.nome}
                 onChange={(e) =>
-                  setDadosBarbearia({
-                    ...dadosBarbearia,
-                    nome: e.target.value,
-                  })
+                  setDadosBarbearia({ ...dadosBarbearia, nome: e.target.value })
                 }
               />
             </div>
-
             <div className="form-group-settings">
               <label>Endereço</label>
               <input
@@ -249,7 +249,6 @@ function Configuracoes() {
           </div>
         );
 
-      /* -------- SERVIÇOS -------- */
       case "servicos":
         return (
           <div className="fade-in">
@@ -258,12 +257,10 @@ function Configuracoes() {
                 <h3>Catálogo de Serviços</h3>
                 <p className="subtitle">Gerencie os serviços oferecidos.</p>
               </div>
-
               <button className="btn-primary" onClick={addServico}>
                 <Plus size={18} /> Novo Serviço
               </button>
             </div>
-
             <div className="services-list">
               {servicos.map((servico) => (
                 <div key={servico._id} className="service-item-row">
@@ -276,7 +273,6 @@ function Configuracoes() {
                     }
                     onBlur={() => salvarEdicaoServico(servico)}
                   />
-
                   <input
                     type="text"
                     className="dark-input small"
@@ -286,7 +282,6 @@ function Configuracoes() {
                     }
                     onBlur={() => salvarEdicaoServico(servico)}
                   />
-
                   <button
                     className="delete-btn-icon"
                     onClick={() => deleteServico(servico._id)}
@@ -299,12 +294,10 @@ function Configuracoes() {
           </div>
         );
 
-      /* -------- PERFIL -------- */
       case "perfil":
         return (
           <div className="fade-in">
             <h3>Perfil</h3>
-
             <div className="form-group-settings">
               <label>Nome</label>
               <input
@@ -314,7 +307,6 @@ function Configuracoes() {
                 onChange={(e) => setPerfil({ ...perfil, nome: e.target.value })}
               />
             </div>
-
             <div className="form-group-settings">
               <label>Email</label>
               <input
@@ -329,12 +321,10 @@ function Configuracoes() {
           </div>
         );
 
-      /* -------- NOTIFICAÇÕES -------- */
       case "notificacoes":
         return (
           <div className="fade-in">
             <h3>Notificações</h3>
-
             <label className="switch-row">
               <span>Receber emails de agendamento</span>
               <input
@@ -356,10 +346,6 @@ function Configuracoes() {
     }
   };
 
-  /* ===============================
-      RENDER FINAL
-  =============================== */
-
   return (
     <div className="page-content fade-in">
       <header className="page-header">
@@ -367,7 +353,6 @@ function Configuracoes() {
           <h1>Configurações</h1>
           <p className="subtitle">Gerencie sua barbearia</p>
         </div>
-
         <button className="btn-primary" onClick={handleSalvarGeral}>
           <Save size={18} /> Salvar Alterações
         </button>
@@ -376,49 +361,36 @@ function Configuracoes() {
       <div className="settings-container">
         <div className="settings-sidebar">
           <div
-            className={`settings-item ${
-              activeTab === "horarios" ? "active" : ""
-            }`}
+            className={`settings-item ${activeTab === "horarios" ? "active" : ""}`}
             onClick={() => setActiveTab("horarios")}
           >
             <Clock size={18} /> Horários
           </div>
-
           <div
             className={`settings-item ${activeTab === "dados" ? "active" : ""}`}
             onClick={() => setActiveTab("dados")}
           >
             <Store size={18} /> Dados
           </div>
-
           <div
-            className={`settings-item ${
-              activeTab === "servicos" ? "active" : ""
-            }`}
+            className={`settings-item ${activeTab === "servicos" ? "active" : ""}`}
             onClick={() => setActiveTab("servicos")}
           >
             <Scissors size={18} /> Serviços
           </div>
-
           <div
-            className={`settings-item ${
-              activeTab === "perfil" ? "active" : ""
-            }`}
+            className={`settings-item ${activeTab === "perfil" ? "active" : ""}`}
             onClick={() => setActiveTab("perfil")}
           >
             <User size={18} /> Perfil
           </div>
-
           <div
-            className={`settings-item ${
-              activeTab === "notificacoes" ? "active" : ""
-            }`}
+            className={`settings-item ${activeTab === "notificacoes" ? "active" : ""}`}
             onClick={() => setActiveTab("notificacoes")}
           >
             <Bell size={18} /> Notificações
           </div>
         </div>
-
         <div className="card settings-content">{renderContent()}</div>
       </div>
     </div>

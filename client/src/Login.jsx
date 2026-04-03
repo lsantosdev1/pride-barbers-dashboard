@@ -1,11 +1,11 @@
 // Hook para controlar estados no React
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // Biblioteca para requisições HTTP
 import api from "./api";
 
 // Hook para navegação entre rotas
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 // Ícones
 import { Mail, Lock } from "lucide-react";
@@ -13,57 +13,141 @@ import { Mail, Lock } from "lucide-react";
 // Logo da aplicação
 import logo from "./assets/imgsalao3.png";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "https://pride-barbers-api.onrender.com";
-
-// Componente de Login
 function Login({ setToken }) {
-  // Estado para armazenar o email digitado
+  // --- ESTADOS DO LOGIN ORIGINAL ---
   const [email, setEmail] = useState("");
-
-  // Estado para armazenar a senha digitada
   const [password, setPassword] = useState("");
+  const [lembrarMe, setLembrarMe] = useState(false);
 
-  // Hook para redirecionamento de páginas
+  // --- ESTADOS DA LÓGICA DO CONSOLE ---
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [secretCode, setSecretCode] = useState("");
+
   const navigate = useNavigate();
 
-  // Função chamada ao enviar o formulário
-  const handleLogin = async (e) => {
-    e.preventDefault(); // Evita recarregar a página
+  // CHAVE MESTRA (Altere aqui se quiser outra senha)
+  const MASTER_KEY = "PRIDE99";
 
+  /* ==========================================================
+      LÓGICA PARA CARREGAR DADOS SALVOS (REMEMBER ME)
+  ========================================================== */
+  useEffect(() => {
+    const emailSalvo = localStorage.getItem("emailLembrado");
+    if (emailSalvo) {
+      setEmail(emailSalvo);
+      setLembrarMe(true);
+    }
+  }, []);
+
+  /* ==========================================================
+      LÓGICA DO CONSOLE (VALIDAÇÃO)
+  ========================================================== */
+  const handleVerifySecret = (e) => {
+    e.preventDefault();
+    if (secretCode === MASTER_KEY) {
+      setIsAuthorized(true);
+    } else {
+      alert("ACESSO NEGADO: Credencial Inválida.");
+      setSecretCode("");
+      navigate("/"); // Opcional: volta pro agendamento se errar
+    }
+  };
+
+  /* ==========================================================
+      FUNÇÃO DE LOGIN (SUA LÓGICA ORIGINAL)
+  ========================================================== */
+  const handleLogin = async (e) => {
+    e.preventDefault();
     try {
-      // Envia email e senha para o backend
       const response = await api.post("/login", {
         email,
         password,
       });
+      // --- LOG DE TESTE (Abra o console F12 para ver isso) ---
+      console.log("Resposta do Servidor:", response.data);
 
-      // Se a autenticação for válida
       if (response.data.auth) {
-        // Salva o token no estado
-        setToken(response.data.token);
+        const token = response.data.token;
+        setToken(token);
 
-        // Salva o token no localStorage
-        localStorage.setItem("token", response.data.token);
-
-        // Redireciona para o dashboard
+        if (lembrarMe) {
+          localStorage.setItem("token", token);
+          localStorage.setItem("emailLembrado", email);
+          console.log("✅ Salvo no LocalStorage");
+        } else {
+          sessionStorage.setItem("token", token);
+          localStorage.removeItem("emailLembrado");
+          console.log("✅ Salvo no SessionStorage");
+        }
         navigate("/dashboard");
+      } else {
+        alert("Erro: O servidor não enviou um token válido.");
       }
     } catch (error) {
-      // Mensagem de erro caso login falhe
-      alert("Usuário ou senha incorretos!");
+      console.error("Erro no Login:", error);
+      alert("Erro: Não foi possível realizar o login.");
     }
   };
 
-  // Renderização do formulário de login
+  /* ==========================================================
+      VISÃO 1: O CONSOLE (ADAPTADO PARA MOBILE)
+  ========================================================== */
+  if (!isAuthorized) {
+    return (
+      <div className="console-screen">
+        <div className="console-box">
+          <p className="console-text">{">"} PRIDE_BARBERS_SYSTEM [v1.0.4]</p>
+          <p className="console-text">{">"} STATUS: AGUARDANDO CREDENCIAL...</p>
+
+          <form onSubmit={handleVerifySecret}>
+            <input
+              type="password"
+              className="console-input"
+              autoFocus
+              value={secretCode}
+              onChange={(e) => setSecretCode(e.target.value)}
+              placeholder="________________________________________"
+              // Isso ajuda o teclado do celular a mostrar o botão de "Enviar"
+              enterKeyHint="go"
+            />
+
+            {/* Botão invisível para garantir que o 'Enter' do teclado funcione */}
+            <button type="submit" style={{ display: "none" }}></button>
+          </form>
+
+          <div className="console-footer">
+            {/* Botão visível para Mobile e Desktop */}
+            <button
+              type="button"
+              className="console-submit-btn"
+              onClick={handleVerifySecret}
+            >
+              [ EXECUTAR COMANDO ]
+            </button>
+
+            <Link to="/" className="cancel-link">
+              CANCELAR
+            </Link>
+          </div>
+          <p className="console-mobile-hint">
+            Digite a chave e toque em EXECUTAR
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  /* ==========================================================
+      VISÃO 2: SEU LOGIN ORIGINAL (APARECE APÓS A CHAVE)
+  ========================================================== */
   return (
     <div className="login-container">
       <form onSubmit={handleLogin}>
-        {/* Logo do sistema */}
         <div
           style={{
             display: "flex",
-            justifyContent: "center",
+            flexDirection: "column",
+            alignItems: "center",
             marginBottom: "1rem",
           }}
         >
@@ -77,50 +161,64 @@ function Login({ setToken }) {
               borderRadius: "50%",
             }}
           />
+          {/* Tag discreta para indicar que o console foi vencido */}
+          <span
+            style={{ fontSize: "10px", color: "#41f1b6", marginTop: "5px" }}
+          >
+            SISTEMA AUTORIZADO
+          </span>
         </div>
 
-        {/* Título */}
         <h2>Login</h2>
 
-        {/* Campo de email */}
         <div className="input-group">
           <Mail size={20} className="input-icon" />
           <input
             type="text"
             placeholder="Usuário"
+            value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
         </div>
 
-        {/* Campo de senha */}
         <div className="input-group">
           <Lock size={20} className="input-icon" />
           <input
             type="password"
             placeholder="Senha"
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
         </div>
 
-        {/* Opções adicionais */}
         <div className="form-options">
-          {/* Checkbox para lembrar o usuário */}
           <label className="checkbox-label">
-            <input type="checkbox" /> Lembrar de mim
+            <input
+              type="checkbox"
+              checked={lembrarMe}
+              onChange={(e) => setLembrarMe(e.target.checked)}
+            />{" "}
+            Lembrar de mim
           </label>
 
-          {/* Link para recuperação de senha */}
-          <a href="#" className="forgot-link">
+          <Link
+            to="/recuperar-senha"
+            style={{
+              fontSize: "0.85rem",
+              color: "#ffffffff",
+              textDecoration: "none",
+            }}
+          >
             Esqueceu a senha?
-          </a>
+          </Link>
         </div>
 
-        {/* Botão de envio */}
         <button type="submit">Entrar</button>
 
-        {/* Link para cadastro */}
-        <div className="register-link">
-          Não tem uma conta? <a href="#">Cadastre-se</a>
+        <div className="register-link" style={{ opacity: 0.3 }}>
+          Não tem uma conta? <Link to="/register">Cadastre-se</Link>
         </div>
       </form>
     </div>

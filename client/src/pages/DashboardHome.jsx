@@ -51,22 +51,27 @@ function DashboardHome() {
       const lista = resAgendamentos.data;
       const config = resConfig.data;
 
+      // NOVA LÓGICA: Cálculo de faturamento mais robusto (limpa R$, pontos e vírgulas)
       const totalFaturamento = lista.reduce((acc, item) => {
-        const apenasNumeros = item.preco
-          ? item.preco.toString().replace(/[^\d,]/g, "")
-          : "0";
+        if (!item.preco) return acc;
+        const apenasNumeros = item.preco.toString().replace(/[^\d,]/g, "");
         const valorNumerico = parseFloat(apenasNumeros.replace(",", "."));
         return acc + (isNaN(valorNumerico) ? 0 : valorNumerico);
       }, 0);
 
+      // NOVA LÓGICA: Gráfico agora respeita os horários DO BARBEIRO logado
       let inicio = 8;
       let fim = 20;
 
-      if (config.horarios) {
+      if (
+        config.horarios &&
+        config.horarios.abertura &&
+        config.horarios.fechamento
+      ) {
         inicio = parseInt(config.horarios.abertura.split(":")[0]);
         fim = parseInt(config.horarios.fechamento.split(":")[0]);
       }
-      if (fim < inicio) fim = 23;
+      if (fim <= inicio) fim = 23;
 
       const novasLabels = [];
       const totalHoras = fim - inicio + 1;
@@ -96,6 +101,7 @@ function DashboardHome() {
     }
   };
 
+  // --- CONFIGURAÇÃO DO GRÁFICO (Mantendo seu visual original) ---
   const dataGrafico = {
     labels: resumo.chartLabels,
     datasets: [

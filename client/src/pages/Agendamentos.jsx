@@ -15,18 +15,14 @@ function Agendamentos() {
   // =================================================================
   // 1. ESTADOS (STATES)
   // =================================================================
-
-  // Dados e Controle de UI
   const [agendamentos, setAgendamentos] = useState([]);
   const [listaServicos, setListaServicos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
 
-  // Filtros
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("Todos");
 
-  // Formulário (Novo Agendamento)
   const [novoAgendamento, setNovoAgendamento] = useState({
     nome: "",
     servico: "",
@@ -38,7 +34,6 @@ function Agendamentos() {
   // =================================================================
   // 2. EFEITOS (USEEFFECT) E CARREGAMENTO
   // =================================================================
-
   useEffect(() => {
     carregarDadosIniciais();
   }, []);
@@ -46,7 +41,7 @@ function Agendamentos() {
   const carregarDadosIniciais = async () => {
     try {
       setLoading(true);
-      // Promise.all executa as requisições em paralelo para maior performance
+      // O Token no api.js garante que resAgendamentos traga apenas os SEUS clientes
       const [resAgendamentos, resServicos] = await Promise.all([
         api.get("/agendamentos"),
         api.get("/servicos"),
@@ -55,7 +50,6 @@ function Agendamentos() {
       setAgendamentos(resAgendamentos.data);
       setListaServicos(resServicos.data);
 
-      // Define um valor padrão para o formulário se houver serviços
       if (resServicos.data.length > 0) {
         const servicoPadrao = resServicos.data[0];
         setNovoAgendamento((prev) => ({
@@ -74,16 +68,12 @@ function Agendamentos() {
   // =================================================================
   // 3. HANDLERS (AÇÕES DO USUÁRIO)
   // =================================================================
-
-  // Atualiza o status do agendamento (Ex: Agendado -> Concluído)
   const atualizarStatus = async (id, novoStatus) => {
     try {
-      // 1. Atualiza no Backend
       await api.put(`/agendamentos/${id}`, {
         status: novoStatus,
       });
 
-      // 2. Atualiza o estado local para refletir na UI imediatamente
       setAgendamentos((prev) =>
         prev.map((item) =>
           item._id === id ? { ...item, status: novoStatus } : item,
@@ -94,11 +84,9 @@ function Agendamentos() {
     }
   };
 
-  // Cria um novo agendamento
   const handleCriar = async (e) => {
     e.preventDefault();
 
-    // Validação simples
     if (
       !novoAgendamento.nome ||
       !novoAgendamento.data ||
@@ -109,17 +97,30 @@ function Agendamentos() {
     }
 
     try {
-      const response = await api.post("/agendamentos", novoAgendamento);
+      // Geramos um avatar básico para manter o visual da tabela bonito
+      const agendamentoComAvatar = {
+        ...novoAgendamento,
+        avatar: `https://ui-avatars.com/api/?name=${novoAgendamento.nome.replace(" ", "+")}&background=random`,
+      };
 
-      // Adiciona o novo item à lista e fecha o modal
+      const response = await api.post("/agendamentos", agendamentoComAvatar);
+
       setAgendamentos([...agendamentos, response.data]);
       setShowModal(false);
+
+      // Limpa o formulário para o próximo
+      setNovoAgendamento({
+        nome: "",
+        servico: listaServicos[0]?.nome || "",
+        data: "",
+        horario: "",
+        preco: listaServicos[0] ? `R$ ${listaServicos[0].preco}` : "",
+      });
     } catch (error) {
       alert("Erro ao criar agendamento.");
     }
   };
 
-  // Remove um agendamento
   const deletarAgendamento = async (id) => {
     if (window.confirm("Tem certeza que deseja excluir este agendamento?")) {
       try {
@@ -131,7 +132,6 @@ function Agendamentos() {
     }
   };
 
-  // Atualiza o formulário quando o usuário troca o serviço no Select
   const mudarServico = (e) => {
     const nomeServico = e.target.value;
     const servicoEncontrado = listaServicos.find((s) => s.nome === nomeServico);
@@ -146,22 +146,16 @@ function Agendamentos() {
   // =================================================================
   // 4. LÓGICA DE FILTROS E HELPERS
   // =================================================================
-
-  // Filtra a lista baseado na busca (texto) e no status selecionado
   const agendamentosFiltrados = agendamentos.filter((item) => {
     const termo = busca.toLowerCase();
-
     const matchTexto =
       item.nome.toLowerCase().includes(termo) ||
       item.servico.toLowerCase().includes(termo);
-
     const matchStatus =
       filtroStatus === "Todos" || item.status === filtroStatus;
-
     return matchTexto && matchStatus;
   });
 
-  // Alterna ciclicamente entre os status disponíveis para filtro
   const alternarFiltroStatus = () => {
     const opcoes = ["Todos", "Agendado", "Em Andamento", "Concluído"];
     const indexAtual = opcoes.indexOf(filtroStatus);
@@ -169,7 +163,6 @@ function Agendamentos() {
     setFiltroStatus(opcoes[proximoIndex]);
   };
 
-  // Retorna estilos dinâmicos baseados no status
   const getStatusStyle = (status) => {
     switch (status) {
       case "Agendado":
@@ -188,18 +181,16 @@ function Agendamentos() {
   // =================================================================
   return (
     <div className="page-content fade-in">
-      {/* --- HEADER --- */}
       <header className="page-header">
         <div>
           <h1>Agendamentos</h1>
-          <p className="subtitle">Gerencie todos os agendamentos</p>
+          <p className="subtitle">Gerencie sua agenda pessoal</p>
         </div>
         <button className="btn-primary" onClick={() => setShowModal(true)}>
           <Plus size={18} /> Novo Agendamento
         </button>
       </header>
 
-      {/* --- BARRA DE FILTROS --- */}
       <div className="filters-bar">
         <div className="search-box">
           <Search size={18} color="#a0a0a0" />
@@ -226,7 +217,6 @@ function Agendamentos() {
         </button>
       </div>
 
-      {/* --- LISTAGEM DE AGENDAMENTOS --- */}
       <div className="schedule-list">
         <h3 className="section-title">
           {loading
@@ -236,9 +226,11 @@ function Agendamentos() {
 
         {agendamentosFiltrados.map((item) => (
           <div key={item._id} className="schedule-card">
-            {/* Coluna 1: Cliente e Status */}
             <div className="client-section">
-              <img src={item.avatar} alt="Avatar do Cliente" />
+              <img
+                src={item.avatar || "https://via.placeholder.com/40"}
+                alt="Avatar"
+              />
               <div>
                 <h4>{item.nome}</h4>
                 <select
@@ -254,12 +246,10 @@ function Agendamentos() {
               </div>
             </div>
 
-            {/* Coluna 2: Serviço */}
             <div className="info-section">
               <p className="service-name">✂️ {item.servico}</p>
             </div>
 
-            {/* Coluna 3: Data e Hora */}
             <div className="time-section">
               <div className="time-row">
                 <Calendar size={14} /> {item.data}
@@ -269,7 +259,6 @@ function Agendamentos() {
               </div>
             </div>
 
-            {/* Coluna 4: Preço e Ações */}
             <div className="price-section">
               <h3>{item.preco}</h3>
               <button
@@ -290,12 +279,11 @@ function Agendamentos() {
 
         {!loading && agendamentosFiltrados.length === 0 && (
           <p style={{ textAlign: "center", marginTop: "2rem", color: "#888" }}>
-            Nenhum agendamento encontrado.
+            Nenhum agendamento encontrado para o seu perfil.
           </p>
         )}
       </div>
 
-      {/* --- MODAL DE NOVO AGENDAMENTO --- */}
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -312,6 +300,7 @@ function Agendamentos() {
                 <input
                   type="text"
                   className="dark-input"
+                  placeholder="Ex: João Silva"
                   value={novoAgendamento.nome}
                   onChange={(e) =>
                     setNovoAgendamento({
@@ -380,7 +369,7 @@ function Agendamentos() {
                   marginTop: "1rem",
                 }}
               >
-                <Save size={18} /> Salvar
+                <Save size={18} /> Salvar Agendamento
               </button>
             </form>
           </div>

@@ -208,7 +208,196 @@ form h2 {
   font-size: 0.9rem;
   color: #8d8c8c;
 }
+/* Estilo do Terminal de Acesso */
+.console-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  font-family: "Courier New", Courier, monospace;
+}
 
+.console-box {
+  width: 100%;
+  max-width: 480px;
+  border: 1px solid #1e293b;
+  padding: 40px;
+  border-radius: 8px;
+}
+
+.console-text {
+  color: #3b82f6; /* Azul do seu print */
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.console-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #333;
+  color: #fff;
+  width: 100%;
+  font-size: 20px;
+  padding: 15px 0;
+  margin-top: 20px;
+  outline: none;
+  letter-spacing: 3px;
+}
+
+.console-footer {
+  margin-top: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #475569;
+}
+
+.cancel-link {
+  color: #ef4444;
+  text-decoration: none;
+}
+
+/* --- ESTILO 'GLASS' PARA LOGIN E CADASTRO (App.css) --- */
+
+/* 1. Page Body: Centraliza o conteúdo vertical e horizontalmente */
+.page-background-glass {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Use a imagem de fundo do Login */
+  background: url("./assets/imgsalao2.png") no-repeat center center/cover;
+  padding: 20px;
+}
+
+/* 2. Glass Container: Visual de vidro padrão */
+.glass-container {
+  backdrop-filter: blur(1px); /* Desfoque enfatizado */
+  padding: 1rem 2rem;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.897);
+  text-align: center;
+}
+
+.glass-container h2 {
+  color: #fff;
+  font-family: "Montserrat", sans-serif; /* Fonte padrão de barbearia */
+  letter-spacing: 2px;
+  margin-bottom: 5px;
+}
+
+.glass-container p {
+  color: #ffffff;
+  font-size: 14px;
+  margin-bottom: 35px;
+}
+
+/* 3. Wrapper do Logo Circular */
+.logo-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 25px;
+}
+
+.logo-circular {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  object-fit: cover;
+}
+
+/* 4. Glass Inputs com ícones */
+.input-group-glass {
+  position: relative;
+  margin-bottom: 18px;
+}
+
+.icon-glass {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #fff; /* Certifique-se de ter ícones brancos como em image_3.png */
+}
+
+.input-group-glass input {
+  width: 100%;
+  padding: 15px 15px 15px 50px; /* Espaço para o ícone à esquerda */
+  background: rgba(0, 0, 0, 0.3); /* Fundo dark do input */
+  border: 1px solid rgba(255, 255, 255, 0.856);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 16px;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+.input-group-glass input::placeholder {
+  color: rgba(
+    255,
+    255,
+    255,
+    0.3
+  ); /* Branco com 70% de opacidade fica mais chique */
+  opacity: 1; /* Necessário para alguns navegadores (como Firefox) não ignorarem a cor */
+}
+
+.input-group-glass input:focus {
+  outline: none;
+  border-color: #ec5252a4; /* Destaque verde como o temporizador */
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* 5. Botão cinza sólido escuro como no Login */
+.btn-confirmar-glass {
+  width: 100%;
+  padding: 15px;
+  background-color: #333; /* Cor sólida cinza escuro como em image_3.png */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background 0.3s ease;
+  margin-top: 30px;
+}
+
+.btn-confirmar-glass:hover {
+  background-color: #444;
+}
+
+/* 6. Texto de link centralizado com cor branca */
+.footer-link-glass {
+  margin-top: 25px;
+  color: #ccc;
+  font-size: 14px;
+  text-align: center;
+}
+
+.footer-link-glass a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.footer-link-glass a:hover {
+  text-decoration: underline;
+}
 /* =========================================
    4. LAYOUT DO DASHBOARD (CSS GRID)
    Estrutura: Sidebar Fixa (260px) + Conteúdo Fluído.

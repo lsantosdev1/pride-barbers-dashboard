@@ -21,6 +21,8 @@ import Login from "./Login";
 import Sidebar from "./components/Sidebar"; // ADICIONADO: Importação da Sidebar
 
 // 5. Páginas
+import RecuperarSenha from "./pages/RecuperarSenha";
+import Register from "./pages/Register"; // ADICIONADO: Página de Registro
 import DashboardHome from "./pages/DashboardHome";
 import Agendar from "./pages/Agendar";
 import Agendamentos from "./pages/Agendamentos";
@@ -97,7 +99,9 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Agendar />} />
+        <Route path="/recuperar-senha" element={<RecuperarSenha />} />
 
+        <Route path="/register" element={<Register />} />
         <Route
           path="/login"
           element={
