@@ -19,23 +19,24 @@ function Sidebar({ handleLogout, user: initialUser }) {
 
   useEffect(() => {
     const fetchUser = async () => {
+      console.log("Iniciando busca do usuário...");
       try {
-        // Se não temos o nome do usuário, buscamos na rota de identidade
-        if (!userData || !userData.nome) {
-          const response = await api.get("/me");
-          setUserData(response.data);
-        }
+        // Forçamos o token a ser lido do Storage antes da chamada
+        const response = await api.get("/me");
+        console.log("Dados recebidos com sucesso:", response.data);
+        setUserData(response.data);
       } catch (error) {
-        console.error("Erro ao carregar perfil na sidebar:", error);
-        // Fallback caso o servidor falhe
-        setUserData({ nome: "Barbeiro", email: "" });
+        console.error("ERRO CRÍTICO NA SIDEBAR:", error);
+        // Se der erro, a gente coloca um nome padrão para não travar o cliente
+        setUserData({ nome: "Barbeiro (Offline)" });
       } finally {
-        setLoading(false);
+        console.log("Finalizando estado de carregamento.");
+        setLoading(false); // ISSO AQUI TEM QUE RODAR!
       }
     };
 
     fetchUser();
-  }, [initialUser]); // Monitora se o user mudar via props
+  }, []);
 
   return (
     <aside className="sidebar">
