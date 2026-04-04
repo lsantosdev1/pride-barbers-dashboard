@@ -47,13 +47,17 @@ function MainLayout({ handleLogout, user, atualizarUsuario }) {
 
 function App() {
   // Inicialização síncrona do token
-  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [token, setToken] = useState(() => {
+    return (
+      localStorage.getItem("token") || sessionStorage.getItem("token") || null
+    );
+  });
+
   const [user, setUser] = useState({
     nome: "Carregando...",
     email: "...",
     avatar: "https://ui-avatars.com/api/?name=User",
   });
-
   const carregarUsuario = async () => {
     const tokenExistente = localStorage.getItem("token");
     if (!tokenExistente) return;
