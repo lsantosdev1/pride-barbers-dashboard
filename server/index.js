@@ -328,10 +328,9 @@ app.get("/public/barbeiros-por-servico", async (req, res) => {
 
     // Busca na tabela de serviços quem faz esse 'nomeServico'
     // O .populate('userId') traz o nome e e-mail do barbeiro junto
-    const profissionais = await Servico.find({ nome: nomeServico }).populate(
-      "userId",
-      "nome email",
-    );
+    const profissionais = await Servico.find({
+      nome: nomeServico.trim(),
+    }).populate("userId", "nome email");
 
     // Organiza os dados para o frontend
     const resultado = profissionais.map((item) => ({

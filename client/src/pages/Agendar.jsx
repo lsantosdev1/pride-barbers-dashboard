@@ -51,7 +51,7 @@ function Agendar() {
     if (nomeS) {
       try {
         const res = await api.get(
-          `/public/barbeiros-por-servico?nomeServico=${nomeS}`,
+          `/public/barbeiros-por-servico?nomeServico=${encodeURIComponent(nomeS)}`,
         );
         setBarbeirosDisponiveis(res.data || []);
       } catch (err) {
