@@ -127,7 +127,24 @@ app.post("/login", async (req, res) => {
   }
   res.status(401).json({ auth: false, message: "Credenciais inválidas" });
 });
+/* --- ROTA PARA PEGAR DADOS DO USUÁRIO LOGADO --- */
+app.get("/perfil", autenticarToken, async (req, res) => {
+  try {
+    // Buscamos o usuário no banco usando o ID que veio do Token (req.user.id)
+    const user = await User.findById(req.user.id).select("-password"); // .select("-password") oculta a senha por segurança
 
+    if (!user) {
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error("Erro ao buscar perfil:", error);
+    res
+      .status(500)
+      .json({ message: "Erro no servidor ao buscar dados do usuário" });
+  }
+});
 /* --- ROTAS PÚBLICAS (Clientes) --- */
 
 app.get("/public/servicos/:barbeiroId", async (req, res) => {
