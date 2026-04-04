@@ -145,6 +145,19 @@ app.get("/perfil", autenticarToken, async (req, res) => {
       .json({ message: "Erro no servidor ao buscar dados do usuário" });
   }
 });
+// Rota para buscar os dados do barbeiro logado
+app.get("/me", autenticarToken, async (req, res) => {
+  try {
+    // req.user.id vem do seu middleware 'autenticarToken'
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user)
+      return res.status(404).json({ message: "Usuário não encontrado" });
+
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Erro ao buscar dados do usuário" });
+  }
+});
 /* --- ROTAS PÚBLICAS (Clientes) --- */
 
 app.get("/public/servicos/:barbeiroId", async (req, res) => {

@@ -1,4 +1,6 @@
-// Ícones utilizados no menu lateral
+import { useState, useEffect } from "react";
+import { NavLink } from "react-router-dom";
+import api from "../services/api"; // Certifique-se que o caminho da sua api.js está correto
 import {
   LayoutDashboard,
   Calendar,
@@ -7,32 +9,44 @@ import {
   LogOut,
 } from "lucide-react";
 
-// Componente para navegação com controle automático de rota ativa
-import { NavLink } from "react-router-dom";
-
-// Logo da aplicação
 import logo from "../assets/imgsalao3.png";
 
-// Componente Sidebar (Menu Lateral)
-function Sidebar({ handleLogout, user }) {
+function Sidebar({ handleLogout, user: initialUser }) {
+  // Criamos um estado interno para o usuário.
+  // Ele começa com o que veio por prop (se houver) ou null.
+  const [userData, setUserData] = useState(initialUser || null);
+  const [loading, setLoading] = useState(!initialUser);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        // Se não temos o nome do usuário, buscamos na rota de identidade
+        if (!userData || !userData.nome) {
+          const response = await api.get("/me");
+          setUserData(response.data);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar perfil na sidebar:", error);
+        // Fallback caso o servidor falhe
+        setUserData({ nome: "Barbeiro", email: "" });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, [initialUser]); // Monitora se o user mudar via props
+
   return (
     <aside className="sidebar">
-      {/* ===============================
-          LOGO / IDENTIDADE VISUAL
-      =============================== */}
+      {/* LOGO */}
       <div className="brand">
         <img src={logo} alt="Pride Barbers" />
         <h3>Pride Barbers</h3>
       </div>
 
-      {/* ===============================
-          NAVEGAÇÃO PRINCIPAL
-      =============================== */}
+      {/* NAVEGAÇÃO PRINCIPAL */}
       <nav>
-        {/* 
-          NavLink aplica automaticamente a classe "active"
-          quando a rota corresponde à URL atual 
-        */}
         <NavLink to="/dashboard" end>
           <LayoutDashboard size={20} />
           <span>Dashboard</span>
@@ -54,18 +68,26 @@ function Sidebar({ handleLogout, user }) {
         </NavLink>
       </nav>
 
-      {/* ===============================
-          PERFIL DO USUÁRIO
-      =============================== */}
+      {/* PERFIL DO USUÁRIO */}
       <div className="user-profile">
-        {/* Avatar do usuário */}
-        <img src={user.avatar} alt="Avatar do usuário" className="avatar" />
+        {/* Avatar dinâmico: Se não tiver imagem, gera uma com as iniciais do nome */}
+        <img
+          src={
+            userData?.avatar ||
+            `https://ui-avatars.com/api/?name=${userData?.nome || "User"}&background=random`
+          }
+          alt="Avatar do usuário"
+          className="avatar"
+        />
 
         <div className="user-info">
-          {/* Nome do usuário */}
-          <p>{user.nome}</p>
+          {/* Lógica do nome ou carregando */}
+          {loading ? (
+            <p style={{ fontSize: "0.8rem", opacity: 0.7 }}>Carregando...</p>
+          ) : (
+            <p>{userData?.nome || "Barbeiro"}</p>
+          )}
 
-          {/* Botão de logout com ícone */}
           <button
             onClick={handleLogout}
             className="logout-btn"
@@ -80,5 +102,4 @@ function Sidebar({ handleLogout, user }) {
   );
 }
 
-// Exportação do componente
 export default Sidebar;
