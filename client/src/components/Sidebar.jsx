@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import api from "../services/api"; // Certifique-se que o caminho da sua api.js está correto
+import api from "../api"; // Certifique-se que o caminho da sua api.js está correto
 import {
   LayoutDashboard,
   Calendar,
