@@ -1,9 +1,6 @@
 /* ==========================================================================
-   PROJETO: PRIDE BARBERS DASHBOARD
-   ARQUIVO: App.jsx
-   DESCRIÇÃO: Componente raiz revisado e limpo.
+   PROJETO: PRIDE BARBERS DASHBOARD - REVISADO (F5 FIXED)
    ========================================================================== */
-
 import { useState, useEffect } from "react";
 import {
   BrowserRouter,
@@ -13,28 +10,20 @@ import {
   Outlet,
 } from "react-router-dom";
 
-// 2. Requisições HTTP
 import api from "./api";
-
-// 4. Componentes Globais
 import Login from "./Login";
-import Sidebar from "./components/Sidebar"; // ADICIONADO: Importação da Sidebar
+import Sidebar from "./components/Sidebar";
 
-// 5. Páginas
 import RecuperarSenha from "./pages/RecuperarSenha";
-import Register from "./pages/Register"; // ADICIONADO: Página de Registro
+import Register from "./pages/Register";
 import DashboardHome from "./pages/DashboardHome";
 import Agendar from "./pages/Agendar";
 import Agendamentos from "./pages/Agendamentos";
 import Relatorios from "./pages/Relatorios";
 import Configuracoes from "./pages/Configuracoes";
 
-// 6. Estilos
 import "./App.css";
 
-/* ==========================================================================
-   COMPONENTE: LAYOUT PRINCIPAL
-   ========================================================================== */
 function MainLayout({ handleLogout, user, atualizarUsuario }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -56,10 +45,8 @@ function MainLayout({ handleLogout, user, atualizarUsuario }) {
   );
 }
 
-/* ==========================================================================
-   COMPONENTE: APP (ROOT)
-   ========================================================================== */
 function App() {
+  // Inicialização síncrona do token
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [user, setUser] = useState({
     nome: "Carregando...",
@@ -69,10 +56,9 @@ function App() {
 
   const carregarUsuario = async () => {
     const tokenExistente = localStorage.getItem("token");
-
-    // Se não houver token, nem tenta fazer a chamada para evitar o erro 401
     if (!tokenExistente) return;
     try {
+      // Usando a rota /config para pegar o perfil
       const res = await api.get("/config");
       if (res.data.perfil) {
         setUser({
@@ -98,10 +84,16 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Agendar />} />
-        <Route path="/recuperar-senha" element={<RecuperarSenha />} />
+        {/* 1. ROTA RAIZ INTELIGENTE */}
+        <Route
+          path="/"
+          element={token ? <Navigate to="/dashboard" /> : <Agendar />}
+        />
 
+        <Route path="/recuperar-senha" element={<RecuperarSenha />} />
         <Route path="/register" element={<Register />} />
+
+        {/* 2. LOGIN COM REDIRECIONAMENTO REVERSO */}
         <Route
           path="/login"
           element={
@@ -113,24 +105,31 @@ function App() {
           }
         />
 
-        {token && (
-          <Route
-            element={
+        {/* 3. ROTAS PROTEGIDAS (DASHBOARD) */}
+        <Route
+          element={
+            token ? (
               <MainLayout
                 handleLogout={handleLogout}
                 user={user}
                 atualizarUsuario={carregarUsuario}
               />
-            }
-          >
-            <Route path="/dashboard" element={<DashboardHome />} />
-            <Route path="/agendamentos" element={<Agendamentos />} />
-            <Route path="/relatorios" element={<Relatorios />} />
-            <Route path="/configuracoes" element={<Configuracoes />} />
-          </Route>
-        )}
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        >
+          <Route path="/dashboard" element={<DashboardHome />} />
+          <Route path="/agendamentos" element={<Agendamentos />} />
+          <Route path="/relatorios" element={<Relatorios />} />
+          <Route path="/configuracoes" element={<Configuracoes />} />
+        </Route>
 
-        <Route path="*" element={<Navigate to="/" />} />
+        {/* 4. CATCH-ALL MELHORADO */}
+        <Route
+          path="*"
+          element={<Navigate to={token ? "/dashboard" : "/"} />}
+        />
       </Routes>
     </BrowserRouter>
   );
