@@ -46,7 +46,7 @@ function MainLayout({ handleLogout, user, atualizarUsuario }) {
 }
 
 function App() {
-  // Inicialização síncrona do token
+  // 1. Inicialização inteligente: Checa as duas "gavetas" no primeiro frame
   const [token, setToken] = useState(() => {
     return (
       localStorage.getItem("token") || sessionStorage.getItem("token") || null
@@ -58,9 +58,14 @@ function App() {
     email: "...",
     avatar: "https://ui-avatars.com/api/?name=User",
   });
+
+  // 2. Carregamento de usuário adaptado para busca dupla
   const carregarUsuario = async () => {
-    const tokenExistente = localStorage.getItem("token");
+    const tokenExistente =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+
     if (!tokenExistente) return;
+
     try {
       // Usando a rota /config para pegar o perfil
       const res = await api.get("/config");
@@ -73,6 +78,8 @@ function App() {
       }
     } catch (error) {
       console.error("Erro ao carregar usuário sidebar", error);
+      // Se o erro for 401 (token expirado), desloga por segurança
+      if (error.response?.status === 401) handleLogout();
     }
   };
 
@@ -80,24 +87,25 @@ function App() {
     if (token) carregarUsuario();
   }, [token]);
 
+  // 3. Logout limpa tudo para não sobrar rastros
   const handleLogout = () => {
-    setToken(null);
     localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
+    setToken(null);
   };
 
   return (
     <BrowserRouter>
       <Routes>
-        {/* 1. ROTA RAIZ INTELIGENTE */}
-        <Route
-          path="/"
-          element={token ? <Navigate to="/dashboard" /> : <Agendar />}
-        />
+        {/* 1. ROTA RAIZ (PÁGINA DO CLIENTE) */}
+        {/* Agora ela é neutra: sempre mostra o Agendar, com ou sem token */}
+        <Route path="/" element={<Agendar />} />
 
         <Route path="/recuperar-senha" element={<RecuperarSenha />} />
         <Route path="/register" element={<Register />} />
 
         {/* 2. LOGIN COM REDIRECIONAMENTO REVERSO */}
+        {/* Aqui mantemos: se o barbeiro tentar "logar de novo", ele volta pro trampo */}
         <Route
           path="/login"
           element={
@@ -130,6 +138,8 @@ function App() {
         </Route>
 
         {/* 4. CATCH-ALL MELHORADO */}
+        {/* Se digitar uma URL que não existe: */}
+        {/* Logado? Vai pro painel. Deslogado? Vai pra tela de agendar. */}
         <Route
           path="*"
           element={<Navigate to={token ? "/dashboard" : "/"} />}
@@ -138,5 +148,4 @@ function App() {
     </BrowserRouter>
   );
 }
-
 export default App;
