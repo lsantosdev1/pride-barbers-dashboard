@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 
 // Biblioteca para requisições HTTP
 import api from "./api";
+import toast from "react-hot-toast"; // Importe no topo do arquivo
 
 // Hook para navegação entre rotas
 import { Link, useNavigate } from "react-router-dom";
@@ -63,6 +64,7 @@ function Login({ setToken }) {
         email,
         password,
       });
+
       // --- LOG DE TESTE (Abra o console F12 para ver isso) ---
       console.log("Resposta do Servidor:", response.data);
 
@@ -79,16 +81,25 @@ function Login({ setToken }) {
           localStorage.removeItem("emailLembrado");
           console.log("✅ Salvo no SessionStorage");
         }
+
+        // --- IMPLEMENTAÇÃO DO TOAST SUCESSO ---
+        toast.success("Login realizado! Bem-vindo de volta. 💈");
+
         navigate("/dashboard");
       } else {
-        alert("Erro: O servidor não enviou um token válido.");
+        // --- TROCADO ALERT POR TOAST ERROR ---
+        toast.error("O servidor não enviou um token válido. ❌");
       }
     } catch (error) {
       console.error("Erro no Login:", error);
-      alert("Erro: Não foi possível realizar o login.");
+
+      // --- TROCADO ALERT POR TOAST ERROR ---
+      const mensagem =
+        error.response?.data?.message ||
+        "Não foi possível realizar o login. ❌";
+      toast.error(mensagem);
     }
   };
-
   /* ==========================================================
       VISÃO 1: O CONSOLE (ADAPTADO PARA MOBILE)
   ========================================================== */
