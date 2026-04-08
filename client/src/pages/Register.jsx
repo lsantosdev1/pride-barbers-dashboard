@@ -4,6 +4,7 @@ import api from "../api";
 // Mantenha ícones leves para o visual de vidro, combinando com image_3.png
 import { UserPlus, Mail, Lock, User, UserCheck } from "lucide-react";
 import "../App.css"; // O único import de CSS
+import toast from "react-hot-toast"; // Importe no topo do arquivo
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -17,18 +18,31 @@ const Register = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+
+    // 1. Validação de senha com Toast (em vez de setErro)
     if (formData.password !== formData.confirmPassword) {
-      setErro("As senhas não coincidem!");
+      toast.error("As senhas não coincidem! ❌");
       return;
     }
+
     try {
+      // 2. Chamada para a API
       await api.post("/register", formData);
-      alert("Cadastro realizado! Faça login agora.");
+
+      // 3. Sucesso!
+      toast.success("Barbeiro cadastrado com sucesso! ✂️");
+
+      // Como o Toaster está no App.jsx, ele vai continuar aparecendo
+      // mesmo depois que você navegar para o login.
       navigate("/login");
     } catch (err) {
-      setErro(
-        err.response?.data?.message || "Erro ao cadastrar. Tente novamente.",
-      );
+      // 4. Erro do servidor com Toast
+      const mensagem =
+        err.response?.data?.message || "Erro ao cadastrar. Tente novamente.";
+      toast.error(mensagem);
+
+      // Se você ainda quiser manter o setErro para mostrar um texto embaixo do botão, pode deixar:
+      // setErro(mensagem);
     }
   };
 

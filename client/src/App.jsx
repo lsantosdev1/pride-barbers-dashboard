@@ -23,6 +23,7 @@ import Relatorios from "./pages/Relatorios";
 import Configuracoes from "./pages/Configuracoes";
 
 import "./App.css";
+import { Toaster } from "react-hot-toast"; // 1. Importe o componente
 
 function MainLayout({ handleLogout, user, atualizarUsuario }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -96,6 +97,16 @@ function App() {
 
   return (
     <BrowserRouter>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: "#1a1a1a", // Fundo escuro igual ao seu sistema
+            color: "#fff",
+            border: "1px solid #ff0000", // Um detalhe em vermelho (opcional)
+          },
+        }}
+      />
       <Routes>
         {/* 1. ROTA RAIZ (PÁGINA DO CLIENTE) */}
         {/* Agora ela é neutra: sempre mostra o Agendar, com ou sem token */}
