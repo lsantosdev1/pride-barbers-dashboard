@@ -99,15 +99,34 @@ app.post("/public/recuperar-senha", async (req, res) => {
 
 app.post("/register", async (req, res) => {
   try {
-    const { nome, email, password } = req.body;
-    const jaExiste = await User.findOne({ email });
-    if (jaExiste)
-      return res.status(400).json({ message: "E-mail já cadastrado" });
+    let { nome, email, password } = req.body;
 
+    // 1. LIMPEZA DOS DADOS (Evita erro de caracteres invisíveis)
+    if (!nome || !email || !password) {
+      return res.status(400).json({ message: "Preencha todos os campos" });
+    }
+    email = email.trim().toLowerCase();
+    nome = nome.trim();
+
+    // 2. VERIFICAÇÃO
+    const jaExiste = await User.findOne({ email });
+    if (jaExiste) {
+      return res.status(400).json({ message: "E-mail já cadastrado" });
+    }
+
+    // 3. CRIAÇÃO
     await User.create({ nome, email, password });
+    console.log(`✅ Novo barbeiro cadastrado: ${email}`);
+
     res.status(201).json({ message: "Barbeiro cadastrado com sucesso!" });
   } catch (error) {
-    res.status(500).json({ message: "Erro ao cadastrar" });
+    // 4. LOG DE ERRO (Isso vai aparecer no painel do Render)
+    console.error("❌ ERRO NO REGISTRO:", error.message);
+
+    res.status(500).json({
+      message: "Erro no servidor",
+      detalhe: error.message, // Isso vai aparecer no seu Toast!
+    });
   }
 });
 
