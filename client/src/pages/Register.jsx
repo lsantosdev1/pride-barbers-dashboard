@@ -30,7 +30,13 @@ const Register = () => {
       await api.post("/register", formData);
 
       // 3. Sucesso!
-      toast.success("Barbeiro cadastrado com sucesso! ✂️");
+      toast.success("Barbeiro cadastrado com sucesso! ✂️", {
+        duration: 4000, // Duração do toast
+      });
+      // 2. ESPERA 2 segundos (2000ms) antes de mudar de página
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
 
       // Como o Toaster está no App.jsx, ele vai continuar aparecendo
       // mesmo depois que você navegar para o login.
