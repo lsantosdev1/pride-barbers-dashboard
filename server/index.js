@@ -230,17 +230,12 @@ app.post("/public/agendamentos", async (req, res) => {
         .json({ message: "Barbeiro não encontrado ou sem configurações." });
     }
 
-    // 3. TRAVA DE PASSADO: Comparação por Milissegundos (Blindada contra Fuso Horário)
-    const agoraMS = Date.now(); // Pega o momento exato agora em milissegundos (UTC)
+    // 3. TRAVA DE PASSADO (Lógica Pura)
+    const agoraMS = Date.now(); // Pega o tempo real no mundo todo agora.
 
-    // Criamos a data do agendamento forçando o fuso de Brasília (-03:00)
-    // Exemplo de resultado: 2026-04-10T19:00:00-03:00
+    // O JavaScript entende o formato YYYY-MM-DDTHH:mm:ss-03:00 nativamente.
+    // Não importa o idioma do servidor, ele vai converter isso para o tempo absoluto.
     const dataAgendamentoMS = new Date(`${data}T${horario}:00-03:00`).getTime();
-
-    // Se a data gerada for inválida (ex: formato de data errado vindo do front)
-    if (isNaN(dataAgendamentoMS)) {
-      return res.status(400).json({ message: "Data ou horário inválido." });
-    }
 
     if (dataAgendamentoMS < agoraMS) {
       return res.status(400).json({
