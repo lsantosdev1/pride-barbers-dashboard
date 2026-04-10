@@ -556,7 +556,136 @@ main {
   background: #ff4444;
   color: white;
 }
+/* =========================================
+   ESTILO AGENDAR (PÚBLICO) - PADRÃO LOGIN
+   ========================================= */
 
+/* 1. Fundo da página inteira */
+.page-content {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  /* Mesma imagem e efeito do Login */
+  background: url("./assets/imgsalao2.png") no-repeat center center;
+  background-size: cover;
+  position: relative;
+  padding: 2rem 1rem;
+}
+
+/* 2. Títulos e Textos do Header */
+.page-header h1 {
+  color: #ffffff !important;
+  font-family: "Georgia", serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.page-header .subtitle {
+  color: rgba(255, 255, 255, 0.8) !important;
+  margin-bottom: 1.5rem;
+}
+
+/* 3. Caixa do Formulário (Efeito Vidro / Modal) */
+.modal-content {
+  background: rgba(20, 20, 20, 0.25) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px);
+
+  border-radius: 14px !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7) !important;
+
+  /* Borda branca fina igual ao Login */
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.4) !important;
+
+  padding: 2rem !important;
+}
+
+/* 4. Labels dos Campos */
+.form-group label {
+  color: #ffffff !important;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 5. Inputs e Selects (Estilo Dark do Login) */
+.dark-input {
+  width: 100%;
+  padding: 12px 15px !important;
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgb(255, 255, 255) !important;
+  border-radius: 8px !important;
+  color: white !important;
+  outline: none;
+  font-size: 1rem;
+  transition: 0.3s ease;
+}
+
+.dark-input:focus {
+  border-color: #41f1b6 !important; /* Cor de destaque para o foco */
+  background: rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Ajuste específico para o Select (setinha branca) */
+select.dark-input option {
+  background-color: #1a1a1a;
+  color: white;
+}
+
+/* 6. Botão de Confirmar (Gradiente do Botão de Login) */
+.btn-primary {
+  padding: 16px !important;
+  background: linear-gradient(to bottom, #666, #444) !important;
+  color: white !important;
+  border: 1px solid #ffffff !important;
+  border-radius: 8px !important;
+  font-weight: bold !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: linear-gradient(to bottom, #777, #555) !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 7. Footer / Rodapé Administrativo */
+footer p,
+footer a {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+footer a:hover {
+  color: #ffffff !important;
+  text-decoration: underline !important;
+}
+
+/* Estilo para a linha do formulário (Data e Hora lado a lado) */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 1rem;
+}
 /* =========================================
    6. COMPONENTES DE UI (CARDS, BUTTONS, INPUTS)
    ========================================= */
