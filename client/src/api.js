@@ -4,6 +4,7 @@ import axios from "axios";
 const api = axios.create({
   // Já deixamos a URL base aqui para não precisar repetir
   baseURL: "https://pride-barbers-api.onrender.com",
+  //baseURL: "http://localhost:5000",
 });
 
 // Interceptor: Executa antes de QUALQUER requisição sair

@@ -137,7 +137,7 @@ function Agendar() {
   }
 
   return (
-    <div className="page-content fade-in">
+    <div className="page-agendar-cliente">
       <header
         className="page-header"
         style={{ justifyContent: "center", textAlign: "center" }}

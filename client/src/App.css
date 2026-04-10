@@ -410,23 +410,34 @@ form h2 {
   overflow: hidden;
   background-color: var(--color-bg-main);
 }
-
+.page-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%; /* Garante que ocupe a largura toda */
+  align-items: stretch !important; /* Faz os filhos (grid) esticarem */
+  gap: 20px;
+  padding-top: 10px; /* Dá uma folga para o título não bater no teto */
+}
 /* Área Principal */
 main {
-  background: radial-gradient(circle at top right, #1a1a1a, #0a0a0a);
+  background: radial-gradient(circle at top right, #1a1a1a, #0a0a0a) !important;
   padding: 2rem;
   overflow-y: auto; /* Scroll apenas no conteúdo */
+  min-height: 100vh;
 }
 
 /* Container de Página (Limita a largura) */
-.page-content {
-  min-height: auto;
-  padding: 4rem 1rem;
+.page-agendar-cliente {
+  width: 100%;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding-bottom: 2rem;
-  animation: fadeIn 0.4s ease-out; /* Animação de entrada suave */
-  overflow-y: auto;
+  justify-content: center;
+  align-items: center;
+  background: url("./assets/imgsalao2.png") no-repeat center center !important;
+  background-size: cover !important;
+  position: relative;
+  padding: 2rem 1rem;
 }
 
 @keyframes fadeIn {
@@ -570,8 +581,7 @@ main {
   align-items: center;
 
   /* Mesma imagem e efeito do Login */
-  background: url("./assets/imgsalao2.png") no-repeat center center;
-  background-size: cover;
+
   position: relative;
   padding: 2rem 1rem;
 }
