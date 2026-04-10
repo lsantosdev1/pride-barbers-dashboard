@@ -230,16 +230,27 @@ app.post("/public/agendamentos", async (req, res) => {
         .json({ message: "Barbeiro não encontrado ou sem configurações." });
     }
 
-    // 3. TRAVA DE PASSADO: Não permite agendar ontem ou hoje em hora que já passou
-    const agora = new Date();
-    const dataAgendamento = new Date(`${data}T${horario}`);
+    // 3. TRAVA DE PASSADO: Ajustada para o fuso de Brasília (GMT-3)
+    // Pega a hora exata agora em SP/Rio
+    const agoraBrasilia = new Date(
+      new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }),
+    );
 
-    if (dataAgendamento < agora) {
+    // Monta a data que o cliente escolheu
+    const dataAgendamento = new Date(`${data}T${horario}:00`);
+
+    // Converte a escolha do cliente também para o contexto de Brasília para comparar "maçã com maçã"
+    const dataAgendamentoAjustada = new Date(
+      dataAgendamento.toLocaleString("en-US", {
+        timeZone: "America/Sao_Paulo",
+      }),
+    );
+
+    if (dataAgendamentoAjustada < agoraBrasilia) {
       return res.status(400).json({
         message: "Ops! Você não pode agendar em um horário que já passou.",
       });
     }
-
     // 4. TRAVA DE MÊS CONTROLADO: Verifica se o barbeiro liberou este mês específico
     const dataEscolhida = new Date(`${data}T00:00:00`);
     const mesEscolhido = dataEscolhida.getMonth() + 1; // Janeiro é 0, somamos 1 para ficar 1-12
