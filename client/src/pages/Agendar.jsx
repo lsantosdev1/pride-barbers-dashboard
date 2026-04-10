@@ -27,6 +27,54 @@ function Agendar() {
   });
 
   // 1. Busca os serviços disponíveis
+  useEffect(() => {
+    const carregar = async () => {
+      try {
+        const res = await api.get("/public/servicos-gerais");
+        setNomesServicos(res.data || []);
+      } catch (err) {
+        console.error("Erro ao carregar serviços");
+      }
+    };
+    carregar();
+  }, []);
+
+  // 2. Quando muda o serviço, busca barbeiros
+  const handleMudarServico = async (e) => {
+    const nomeS = e.target.value;
+    setDadosAgendamento({
+      ...dadosAgendamento,
+      servico: nomeS,
+      barbeiroId: "",
+      preco: "",
+    });
+
+    if (nomeS) {
+      try {
+        const res = await api.get(
+          `/public/barbeiros-por-servico?nomeServico=${encodeURIComponent(nomeS)}`,
+        );
+        setBarbeirosDisponiveis(res.data || []);
+      } catch (err) {
+        setBarbeirosDisponiveis([]);
+      }
+    }
+  };
+
+  // 3. Quando muda o barbeiro, define o preço
+  const handleMudarBarbeiro = (e) => {
+    const id = e.target.value;
+    const b = barbeirosDisponiveis.find((x) => x.barbeiroId === id);
+    if (b) {
+      setDadosAgendamento({
+        ...dadosAgendamento,
+        barbeiroId: id,
+        barbeiroNome: b.barbeiroNome,
+        preco: `R$ ${b.preco}`,
+      });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
