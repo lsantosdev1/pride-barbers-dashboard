@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { useState } from "react";
 import api from "../api";
 import { Link } from "react-router-dom";
@@ -16,9 +17,18 @@ function RecuperarSenha() {
     try {
       // Rota pública no backend para solicitar o reset
       await api.post("/public/recuperar-senha", { email });
+
+      // --- TOAST DE SUCESSO ---
+      toast.success("Instruções enviadas! Verifique sua caixa de entrada. 📧", {
+        duration: 5000,
+      });
+
       setEnviado(true);
     } catch (error) {
-      alert("Erro ao processar solicitação. Verifique o e-mail digitado.");
+      // --- TROCADO ALERT POR TOAST ERRO ---
+      toast.error(
+        "Erro ao processar solicitação. Verifique o e-mail digitado. ❌",
+      );
     } finally {
       setLoading(false);
     }

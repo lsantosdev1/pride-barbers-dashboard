@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import api from "../api";
+import toast from "react-hot-toast";
 import {
   Calendar,
   Clock,
@@ -26,59 +27,17 @@ function Agendar() {
   });
 
   // 1. Busca os serviços disponíveis
-  useEffect(() => {
-    const carregar = async () => {
-      try {
-        const res = await api.get("/public/servicos-gerais");
-        setNomesServicos(res.data || []);
-      } catch (err) {
-        console.error("Erro ao carregar serviços");
-      }
-    };
-    carregar();
-  }, []);
-
-  // 2. Quando muda o serviço, busca barbeiros
-  const handleMudarServico = async (e) => {
-    const nomeS = e.target.value;
-    setDadosAgendamento({
-      ...dadosAgendamento,
-      servico: nomeS,
-      barbeiroId: "",
-      preco: "",
-    });
-
-    if (nomeS) {
-      try {
-        const res = await api.get(
-          `/public/barbeiros-por-servico?nomeServico=${encodeURIComponent(nomeS)}`,
-        );
-        setBarbeirosDisponiveis(res.data || []);
-      } catch (err) {
-        setBarbeirosDisponiveis([]);
-      }
-    }
-  };
-
-  // 3. Quando muda o barbeiro, define o preço
-  const handleMudarBarbeiro = (e) => {
-    const id = e.target.value;
-    const b = barbeirosDisponiveis.find((x) => x.barbeiroId === id);
-    if (b) {
-      setDadosAgendamento({
-        ...dadosAgendamento,
-        barbeiroId: id,
-        barbeiroNome: b.barbeiroNome,
-        preco: `R$ ${b.preco}`,
-      });
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       await api.post("/public/agendamentos", dadosAgendamento);
+
+      // --- TOAST DE SUCESSO ---
+      toast.success("Horário agendado com sucesso! ✂️", {
+        duration: 5000,
+      });
+
       setSucesso(true);
     } catch (error) {
       // Verifica se o servidor enviou uma resposta com erro
@@ -88,20 +47,23 @@ function Agendar() {
         // Se houver sugestões de horários (conflito de agenda)
         if (sugestoes && sugestoes.length > 0) {
           const livres = sugestoes.join(", ");
-          alert(`${message} Sugestões para este dia: ${livres}`);
+
+          // --- TOAST DE ERRO COM SUGESTÕES ---
+          toast.error(`${message} Sugestões: ${livres}`, {
+            duration: 6000,
+          });
         } else {
-          // Se for erro de mês bloqueado ou data passada, mostra a mensagem real do servidor
-          alert(message);
+          // --- TOAST DE ERRO (Mês bloqueado, data passada, etc) ---
+          toast.error(message);
         }
       } else {
         // Caso seja um erro de conexão ou algo desconhecido
-        alert("Erro ao processar agendamento. Tente novamente mais tarde.");
+        toast.error("Erro ao processar agendamento. Tente novamente.");
       }
     } finally {
       setLoading(false);
     }
   };
-
   if (sucesso) {
     return (
       <div

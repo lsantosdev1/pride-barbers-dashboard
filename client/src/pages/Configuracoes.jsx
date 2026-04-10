@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 // Hooks do React
 import { useState, useEffect } from "react";
 
@@ -88,6 +89,7 @@ function Configuracoes() {
   /* ===============================
       SALVAR CONFIGURAÇÕES
   =============================== */
+
   const handleSalvarGeral = async () => {
     try {
       const payload = {
@@ -98,23 +100,31 @@ function Configuracoes() {
       };
 
       await api.put("/config", payload);
-      alert("Configurações da Pride Barbers salvas com sucesso!");
+
+      // TROCADO ALERT POR TOAST SUCESSO
+      toast.success("Configurações salvas com sucesso! 💾");
     } catch (error) {
       console.error("Erro ao salvar configurações:", error);
-      alert("Erro ao salvar configurações.");
+
+      // TROCADO ALERT POR TOAST ERRO
+      toast.error("Erro ao salvar configurações. Verifique os dados.");
     }
   };
 
   /* ===============================
-      CRUD DE SERVIÇOS
-  =============================== */
+    CRUD DE SERVIÇOS
+=============================== */
   const addServico = async () => {
     try {
       const novoServico = { nome: "Novo Serviço", preco: "0,00" };
       const res = await api.post("/servicos", novoServico);
       setServicos([...servicos, res.data]);
+
+      // ADICIONADO TOAST PARA FEEDBACK
+      toast.success("Novo serviço adicionado! Edite o nome e o preço. ✂️");
     } catch (error) {
-      alert("Erro ao adicionar serviço");
+      // TROCADO ALERT POR TOAST ERRO
+      toast.error("Erro ao adicionar serviço.");
     }
   };
 
@@ -123,28 +133,30 @@ function Configuracoes() {
       try {
         await api.delete(`/servicos/${id}`);
         setServicos(servicos.filter((s) => s._id !== id));
+
+        // ADICIONADO TOAST SUCESSO
+        toast.success("Serviço removido! 🗑️");
       } catch (error) {
-        alert("Erro ao deletar serviço");
+        // TROCADO ALERT POR TOAST ERRO
+        toast.error("Erro ao deletar serviço.");
       }
     }
-  };
-
-  const handleEditChange = (id, campo, valor) => {
-    setServicos(
-      servicos.map((s) => (s._id === id ? { ...s, [campo]: valor } : s)),
-    );
   };
 
   const salvarEdicaoServico = async (servico) => {
     if (!servico.nome || servico.nome === "Novo Serviço") return;
     try {
       await api.put(`/servicos/${servico._id}`, servico);
-      console.log("Serviço atualizado com sucesso!");
+
+      // TROCADO CONSOLE.LOG POR TOAST SUCESSO
+      toast.success("Serviço atualizado! ✅");
     } catch (error) {
       console.error("Erro ao salvar edição");
+
+      // ADICIONADO TOAST ERRO
+      toast.error("Erro ao salvar alteração do serviço.");
     }
   };
-
   /* ===============================
       RENDERIZAÇÃO DINÂMICA
   =============================== */

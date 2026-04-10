@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   Calendar,
   FileText,
+  Receipt,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -56,6 +57,11 @@ function Sidebar({ handleLogout, user: initialUser }) {
         <NavLink to="/agendamentos">
           <Calendar size={20} />
           <span>Agendamentos</span>
+        </NavLink>
+
+        <NavLink to="/gastos">
+          <Receipt size={20} />
+          <span>Gastos</span>
         </NavLink>
 
         <NavLink to="/relatorios">

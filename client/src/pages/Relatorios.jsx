@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { useState, useEffect } from "react";
 import api from "../api";
 import {
@@ -72,8 +73,13 @@ function Relatorios() {
       if (resConfig.data.horarios) {
         setHorariosLoja(resConfig.data.horarios);
       }
+
+      // Opcional: toast.success("Relatórios sincronizados! 📊", { id: 'relatorio-load' });
     } catch (error) {
       console.error("Erro ao carregar dados do relatório:", error);
+
+      // --- IMPLEMENTAÇÃO DO TOAST DE ERRO ---
+      toast.error("Não foi possível carregar os dados do relatório. 📉");
     }
   };
 

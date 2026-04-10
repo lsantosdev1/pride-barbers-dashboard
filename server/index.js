@@ -67,6 +67,14 @@ const servicoSchema = new mongoose.Schema({
   preco: String,
 });
 const Servico = mongoose.model("Servico", servicoSchema);
+const gastoSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  descricao: { type: String, required: true },
+  valor: { type: Number, required: true },
+  categoria: { type: String, default: "Produtos" }, // ex: Produtos, Aluguel, Luz
+  data: { type: String, required: true },
+});
+const Gasto = mongoose.model("Gasto", gastoSchema);
 
 /* --- MIDDLEWARE DE AUTENTICAÇÃO --- */
 function autenticarToken(req, res, next) {
@@ -459,7 +467,21 @@ app.delete("/servicos/:id", autenticarToken, async (req, res) => {
     return res.status(404).json({ message: "Serviço não encontrado" });
   res.json({ message: "Serviço removido com sucesso" });
 });
+// CRUD GASTOS
+app.get("/gastos", autenticarToken, async (req, res) => {
+  const lista = await Gasto.find({ userId: req.user.id });
+  res.json(lista);
+});
 
+app.post("/gastos", autenticarToken, async (req, res) => {
+  const novoGasto = await Gasto.create({ ...req.body, userId: req.user.id });
+  res.status(201).json(novoGasto);
+});
+
+app.delete("/gastos/:id", autenticarToken, async (req, res) => {
+  await Gasto.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
+  res.json({ message: "Gasto removido" });
+});
 /* --- INICIALIZAÇÃO --- */
 app.listen(PORT, () =>
   console.log(`🔥 Pride Barbers v2.0 rodando na porta ${PORT}`),

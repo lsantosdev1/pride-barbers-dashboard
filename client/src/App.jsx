@@ -20,6 +20,7 @@ import DashboardHome from "./pages/DashboardHome";
 import Agendar from "./pages/Agendar";
 import Agendamentos from "./pages/Agendamentos";
 import Relatorios from "./pages/Relatorios";
+import Gastos from "./pages/Gastos";
 import Configuracoes from "./pages/Configuracoes";
 
 import "./App.css";
@@ -145,6 +146,7 @@ function App() {
           <Route path="/dashboard" element={<DashboardHome />} />
           <Route path="/agendamentos" element={<Agendamentos />} />
           <Route path="/relatorios" element={<Relatorios />} />
+          <Route path="/gastos" element={<Gastos />} />
           <Route path="/configuracoes" element={<Configuracoes />} />
         </Route>
 

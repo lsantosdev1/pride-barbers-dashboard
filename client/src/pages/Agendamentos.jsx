@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import api from "../api";
+import toast from "react-hot-toast";
 import {
   Plus,
   Search,
@@ -41,49 +42,40 @@ function Agendamentos() {
   const carregarDadosIniciais = async () => {
     try {
       setLoading(true);
-      // O Token no api.js garante que resAgendamentos traga apenas os SEUS clientes
       const [resAgendamentos, resServicos] = await Promise.all([
         api.get("/agendamentos"),
         api.get("/servicos"),
       ]);
-
       setAgendamentos(resAgendamentos.data);
       setListaServicos(resServicos.data);
-
-      if (resServicos.data.length > 0) {
-        const servicoPadrao = resServicos.data[0];
-        setNovoAgendamento((prev) => ({
-          ...prev,
-          servico: servicoPadrao.nome,
-          preco: `R$ ${servicoPadrao.preco}`,
-        }));
-      }
+      // ... lógica do serviço padrão
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
+      toast.error("Erro ao sincronizar dados com o servidor. 🔄");
     } finally {
       setLoading(false);
     }
   };
 
-  // =================================================================
-  // 3. HANDLERS (AÇÕES DO USUÁRIO)
-  // =================================================================
+  // 1. ATUALIZAR STATUS (Concluir, Cancelar, etc.)
   const atualizarStatus = async (id, novoStatus) => {
     try {
-      await api.put(`/agendamentos/${id}`, {
-        status: novoStatus,
-      });
+      await api.put(`/agendamentos/${id}`, { status: novoStatus });
 
       setAgendamentos((prev) =>
         prev.map((item) =>
           item._id === id ? { ...item, status: novoStatus } : item,
         ),
       );
+
+      // BALÃO DE SUCESSO
+      toast.success(`Status alterado para ${novoStatus}! ✅`);
     } catch (error) {
-      alert("Erro ao atualizar status. Tente novamente.");
+      toast.error("Não foi possível atualizar o status.");
     }
   };
 
+  // 2. CRIAR AGENDAMENTO (Via Modal no Dashboard)
   const handleCriar = async (e) => {
     e.preventDefault();
 
@@ -92,12 +84,11 @@ function Agendamentos() {
       !novoAgendamento.data ||
       !novoAgendamento.horario
     ) {
-      alert("Por favor, preencha todos os campos obrigatórios.");
+      toast.error("Preencha todos os campos obrigatórios! ⚠️");
       return;
     }
 
     try {
-      // Geramos um avatar básico para manter o visual da tabela bonito
       const agendamentoComAvatar = {
         ...novoAgendamento,
         avatar: `https://ui-avatars.com/api/?name=${novoAgendamento.nome.replace(" ", "+")}&background=random`,
@@ -108,7 +99,9 @@ function Agendamentos() {
       setAgendamentos([...agendamentos, response.data]);
       setShowModal(false);
 
-      // Limpa o formulário para o próximo
+      // BALÃO DE SUCESSO
+      toast.success("Agendamento criado com sucesso! ✂️");
+
       setNovoAgendamento({
         nome: "",
         servico: listaServicos[0]?.nome || "",
@@ -117,17 +110,21 @@ function Agendamentos() {
         preco: listaServicos[0] ? `R$ ${listaServicos[0].preco}` : "",
       });
     } catch (error) {
-      alert("Erro ao criar agendamento.");
+      toast.error("Erro ao criar agendamento no painel.");
     }
   };
 
+  // 3. DELETAR AGENDAMENTO
   const deletarAgendamento = async (id) => {
     if (window.confirm("Tem certeza que deseja excluir este agendamento?")) {
       try {
         await api.delete(`/agendamentos/${id}`);
         setAgendamentos((prev) => prev.filter((item) => item._id !== id));
+
+        // BALÃO DE SUCESSO
+        toast.success("Agendamento removido! 🗑️");
       } catch (error) {
-        alert("Erro ao deletar agendamento.");
+        toast.error("Erro ao deletar agendamento.");
       }
     }
   };
