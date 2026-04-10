@@ -142,6 +142,11 @@ function Configuracoes() {
       }
     }
   };
+  const handleEditChange = (id, campo, valor) => {
+    setServicos(
+      servicos.map((s) => (s._id === id ? { ...s, [campo]: valor } : s)),
+    );
+  };
 
   const salvarEdicaoServico = async (servico) => {
     if (!servico.nome || servico.nome === "Novo Serviço") return;
