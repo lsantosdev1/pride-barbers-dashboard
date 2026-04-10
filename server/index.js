@@ -353,19 +353,29 @@ app.get("/public/barbeiros-por-servico", async (req, res) => {
   try {
     const { nomeServico } = req.query;
 
-    // 1. Criamos um padrão de busca flexível
-    // O sinal de "+" é um caractere especial no Regex, então "limpamos" ele
     const termoBusca = nomeServico
       .trim()
-      .replace(/\+/g, "\\+") // Faz o "+" ser lido como texto, não como comando
-      .replace(/\s+/g, ".*"); // Transforma qualquer espaço em "qualquer coisa no meio"
+      .replace(/\+/g, "\\+")
+      .replace(/\s+/g, ".*");
 
-    // 2. A mágica acontece aqui com o $regex
     const profissionais = await Servico.find({
-      nome: { $regex: termoBusca, $options: "i" }, // 'i' serve para ignorar Maiúsculas/Minúsculas
+      nome: { $regex: termoBusca, $options: "i" },
     }).populate("userId", "nome email");
 
-    const resultado = profissionais.map((item) => ({
+    // --- MÁGICA PARA REMOVER DUPLICADOS ---
+    const barbeirosUnicos = [];
+    const idsEncontrados = new Set();
+
+    for (const item of profissionais) {
+      // Verifica se o barbeiro existe e se já não o colocamos na lista
+      if (item.userId && !idsEncontrados.has(item.userId._id.toString())) {
+        barbeirosUnicos.push(item);
+        idsEncontrados.add(item.userId._id.toString());
+      }
+    }
+
+    // Organiza os dados finais usando a lista de únicos
+    const resultado = barbeirosUnicos.map((item) => ({
       barbeiroId: item.userId._id,
       barbeiroNome: item.userId.nome,
       preco: item.preco,
@@ -377,7 +387,6 @@ app.get("/public/barbeiros-por-servico", async (req, res) => {
     res.status(500).json({ message: "Erro ao buscar profissionais" });
   }
 });
-
 /* --- ROTAS PROTEGIDAS (Admin / Barbeiro) --- */
 
 // CONFIGURAÇÕES
