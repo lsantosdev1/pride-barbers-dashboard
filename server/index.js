@@ -230,31 +230,13 @@ app.post("/public/agendamentos", async (req, res) => {
         .json({ message: "Barbeiro não encontrado ou sem configurações." });
     }
 
-    // 3. TRAVA DE PASSADO: Blindada contra formato de data e fuso da Vercel
-    const agoraMS = Date.now();
+    // 3. TRAVA DE PASSADO: Não permite agendar ontem ou hoje em hora que já passou
 
-    // Garante que a data esteja no formato YYYY-MM-DD (o JS odeia DD/MM/YYYY)
-    let dataISO = data;
-    if (data.includes("/")) {
-      const [dia, mes, ano] = data.split("/");
-      dataISO = `${ano}-${mes}-${dia}`; // Inverte para 2026-04-10
-    }
+    const agora = new Date();
 
-    // Criamos o timestamp do agendamento forçando o fuso de Brasília (-03:00)
-    const dataAgendamentoMS = new Date(
-      `${dataISO}T${horario}:00-03:00`,
-    ).getTime();
+    const dataAgendamento = new Date(`${data}T${horario}`);
 
-    // Log para você ver no terminal da Vercel o que está acontecendo (opcional)
-    console.log(`Agora: ${agoraMS} | Agendamento: ${dataAgendamentoMS}`);
-
-    if (isNaN(dataAgendamentoMS)) {
-      return res
-        .status(400)
-        .json({ message: "Data ou horário em formato inválido." });
-    }
-
-    if (dataAgendamentoMS < agoraMS) {
+    if (dataAgendamento < agora) {
       return res.status(400).json({
         message: "Ops! Você não pode agendar em um horário que já passou.",
       });
