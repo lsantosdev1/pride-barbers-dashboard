@@ -48,6 +48,15 @@ function Agendamentos() {
       ]);
       setAgendamentos(resAgendamentos.data);
       setListaServicos(resServicos.data);
+
+      if (resServicos.data.length > 0) {
+        const servicoPadrao = resServicos.data[0];
+        setNovoAgendamento((prev) => ({
+          ...prev,
+          servico: servicoPadrao.nome,
+          preco: `R$ ${servicoPadrao.preco}`,
+        }));
+      }
       // ... lógica do serviço padrão
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
