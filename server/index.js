@@ -230,23 +230,19 @@ app.post("/public/agendamentos", async (req, res) => {
         .json({ message: "Barbeiro não encontrado ou sem configurações." });
     }
 
-    // 3. TRAVA DE PASSADO: Ajustada para o fuso de Brasília (GMT-3)
-    // Pega a hora exata agora em SP/Rio
-    const agoraBrasilia = new Date(
-      new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }),
-    );
+    // 3. TRAVA DE PASSADO: Comparação por Milissegundos (Blindada contra Fuso Horário)
+    const agoraMS = Date.now(); // Pega o momento exato agora em milissegundos (UTC)
 
-    // Monta a data que o cliente escolheu
-    const dataAgendamento = new Date(`${data}T${horario}:00`);
+    // Criamos a data do agendamento forçando o fuso de Brasília (-03:00)
+    // Exemplo de resultado: 2026-04-10T19:00:00-03:00
+    const dataAgendamentoMS = new Date(`${data}T${horario}:00-03:00`).getTime();
 
-    // Converte a escolha do cliente também para o contexto de Brasília para comparar "maçã com maçã"
-    const dataAgendamentoAjustada = new Date(
-      dataAgendamento.toLocaleString("en-US", {
-        timeZone: "America/Sao_Paulo",
-      }),
-    );
+    // Se a data gerada for inválida (ex: formato de data errado vindo do front)
+    if (isNaN(dataAgendamentoMS)) {
+      return res.status(400).json({ message: "Data ou horário inválido." });
+    }
 
-    if (dataAgendamentoAjustada < agoraBrasilia) {
+    if (dataAgendamentoMS < agoraMS) {
       return res.status(400).json({
         message: "Ops! Você não pode agendar em um horário que já passou.",
       });
