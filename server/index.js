@@ -351,15 +351,20 @@ app.get("/public/servicos-gerais", async (req, res) => {
 // 2. NOVA ROTA: Quando o cliente clica em "Corte", essa rota busca quais barbeiros fazem esse serviço
 app.get("/public/barbeiros-por-servico", async (req, res) => {
   try {
-    const { nomeServico } = req.query; // Pega o nome do serviço da URL
+    const { nomeServico } = req.query;
 
-    // Busca na tabela de serviços quem faz esse 'nomeServico'
-    // O .populate('userId') traz o nome e e-mail do barbeiro junto
+    // 1. Criamos um padrão de busca flexível
+    // O sinal de "+" é um caractere especial no Regex, então "limpamos" ele
+    const termoBusca = nomeServico
+      .trim()
+      .replace(/\+/g, "\\+") // Faz o "+" ser lido como texto, não como comando
+      .replace(/\s+/g, ".*"); // Transforma qualquer espaço em "qualquer coisa no meio"
+
+    // 2. A mágica acontece aqui com o $regex
     const profissionais = await Servico.find({
-      nome: nomeServico.trim(),
+      nome: { $regex: termoBusca, $options: "i" }, // 'i' serve para ignorar Maiúsculas/Minúsculas
     }).populate("userId", "nome email");
 
-    // Organiza os dados para o frontend
     const resultado = profissionais.map((item) => ({
       barbeiroId: item.userId._id,
       barbeiroNome: item.userId.nome,
@@ -368,6 +373,7 @@ app.get("/public/barbeiros-por-servico", async (req, res) => {
 
     res.json(resultado);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Erro ao buscar profissionais" });
   }
 });
