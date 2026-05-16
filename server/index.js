@@ -22,12 +22,11 @@ const SECRET_KEY = process.env.JWT_SECRET || "pride_barbers_secret_key";
 // Prioriza a URL do .env para evitar mensagens de exposição no GitHub
 const DATABASE_URL =
   process.env.MONGODB_URI ||
-  "mongodb+srv://lsantos2152_db_user:qhRvWdnje49LtlLU@cluster0.mskhodx.mongodb.net/pride_barbers?retryWrites=true&w=majority";
-/* --- CONEXÃO MONGODB --- */
-mongoose
-  .connect(DATABASE_URL)
-  .then(() => console.log("✅ Conectado ao MongoDB Atlas!"))
-  .catch((err) => console.error("❌ Erro ao conectar ao MongoDB:", err));
+  /* --- CONEXÃO MONGODB --- */
+  mongoose
+    .connect(DATABASE_URL)
+    .then(() => console.log("✅ Conectado ao MongoDB Atlas!"))
+    .catch((err) => console.error("❌ Erro ao conectar ao MongoDB:", err));
 
 app.use(express.json());
 app.use(cors());
