@@ -3,6 +3,9 @@
    DESCRIÇÃO: API REST com MongoDB Atlas, JWT e Isolamento de Dados
    ========================================================================== */
 
+// 1. Carregar variáveis de ambiente o mais cedo possível
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
@@ -12,12 +15,14 @@ const app = express();
 
 /* --- CONFIGURAÇÕES --- */
 const PORT = process.env.PORT || 3001;
-const SECRET_KEY = "pride_barbers_secret_key";
 
+// Prioriza a chave do .env, se não existir, usa a string fixa
+const SECRET_KEY = process.env.JWT_SECRET || "pride_barbers_secret_key";
+
+// Prioriza a URL do .env para evitar mensagens de exposição no GitHub
 const DATABASE_URL =
-  process.env.DATABASE_URL ||
+  process.env.MONGODB_URI ||
   "mongodb+srv://lsantos2152_db_user:qhRvWdnje49LtlLU@cluster0.mskhodx.mongodb.net/pride_barbers?retryWrites=true&w=majority";
-
 /* --- CONEXÃO MONGODB --- */
 mongoose
   .connect(DATABASE_URL)
